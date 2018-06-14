@@ -29,7 +29,7 @@ class NextBusClient():
                 should be compressed.
         """
 
-        if output_format is not None and not isinstance(output_format, str):
+        if not isinstance(output_format, str):
             raise TypeError('"output_format" must be a string.')
 
         if output_format.lower() not in ['json', 'xml']:
@@ -61,7 +61,7 @@ class NextBusClient():
             'command': 'agencyList'
         }
 
-        return self._perform_request(params)
+        return self._perform_request(params=params)
 
     def get_messages(self, route_tags, agency=None):
         """Make a request to the NextBus API with the "messages" command to get currently active
@@ -84,14 +84,10 @@ class NextBusClient():
                 valid JSON.
         """
 
-        if not isinstance(stops, list) and not isinstance(stops, tuple):
+        if not isinstance(route_tags, list) and not isinstance(route_tags, tuple):
             raise TypeError('"route_tags" must be a list or tuple.')
 
-        if agency is None:
-            if self.agency is None:
-                raise ValueError('"agency" is required.')
-            else:
-                agency = self.agency
+        agency = self._get_agency(agency)
 
         params = {
             'command': 'messages',
@@ -100,7 +96,7 @@ class NextBusClient():
             'a': agency
         }
 
-        return self._perform_request(params)
+        return self._perform_request(params=params)
 
     def get_route_list(self, agency=None):
         """Make a request to the NextBus API with the "routeList" command to get a list of routes
@@ -121,18 +117,14 @@ class NextBusClient():
                 valid JSON.
         """
 
-        if agency is None:
-            if self.agency is None:
-                raise ValueError('"agency" is required.')
-            else:
-                agency = self.agency
+        agency = self._get_agency(agency)
 
         params = {
             'command': 'routeList',
             'a': agency
         }
 
-        return self._perform_request(params)
+        return self._perform_request(params=params)
 
     def get_route_config(self, route_tag=None, agency=None):
         """Make a request to the NextBus API with the "routeConfig" command to get the details of a
@@ -155,21 +147,17 @@ class NextBusClient():
                 valid JSON.
         """
 
-        if agency is None:
-            if self.agency is None:
-                raise ValueError('"agency" is required.')
-            else:
-                agency = self.agency
+        agency = self._get_agency(agency)
 
         params = {
-            'comamnd': 'routeConfig',
+            'command': 'routeConfig',
             'a': agency
         }
 
         if route_tag is not None:
             params['r'] = route_tag
 
-        return self._perform_request(params)
+        return self._perform_request(params=params)
 
     def get_predictions(self, stop_id, route_tag=None, agency=None):
         """Make a request to the NextBus API with the "predictions" command to get arrival time
@@ -194,11 +182,7 @@ class NextBusClient():
                 valid JSON.
         """
 
-        if agency is None:
-            if self.agency is None:
-                raise ValueError('"agency" is required.')
-            else:
-                agency = self.agency
+        agency = self._get_agency(agency)
 
         params = {
             'command': 'predictions',
@@ -209,7 +193,7 @@ class NextBusClient():
         if route_tag is not None:
             params['routeTag'] = route_tag
 
-        return self._perform_request(params)
+        return self._perform_request(params=params)
 
     def get_predictions_for_multi_stops(self, stops, agency=None):
         """Make a request to the NextBus API with the "predictionsForMultiStops" command to get
@@ -239,21 +223,17 @@ class NextBusClient():
 
         for stop in stops:
             if not isinstance(stop, dict) or 'route_tag' not in stop or 'stop_id' not in stop:
-                raise ValueError
+                raise ValueError('"stops" must contain dictionaries with the "route_tag" and "stop_id" keys')
 
-        if agency is None:
-            if self.agency is None:
-                raise ValueError('"agency" is required.')
-            else:
-                agency = self.agency
+        agency = self._get_agency(agency)
 
         params = {
             'command': 'predictionsForMultiStops',
             # Hacky way of repeating the "stops" key in the query string for each route
             'stops': '&stops='.join(['%s|%d' % (stop['route_tag'], stop['stop_id']) for stop in stops]),
-            'agency': agency
+            'a': agency
         }
-        return self._perform_request(params)
+        return self._perform_request(params=params)
 
     def get_schedule(self, route_tag, agency=None):
         """Make a request to the NextBus API with the "schedule" command to get the schedule for a
@@ -275,11 +255,7 @@ class NextBusClient():
                 valid JSON.
         """
 
-        if agency is None:
-            if self.agency is None:
-                raise ValueError('"agency" is required.')
-            else:
-                agency = self.agency
+        agency = self._get_agency(agency)
 
         params = {
             'command': 'schedule',
@@ -287,7 +263,7 @@ class NextBusClient():
             'r': route_tag
         }
 
-        return self._perform_request(params)
+        return self._perform_request(params=params)
 
     def get_vehicle_locations(self, route_tag, timestamp, agency=None):
         """Make a request to the NextBus API with the "vehicleLocations" command to get the all of
@@ -311,11 +287,7 @@ class NextBusClient():
                 valid JSON.
         """
 
-        if agency is None:
-            if self.agency is None:
-                raise ValueError('"agency" is required.')
-            else:
-                agency = self.agency
+        agency = self._get_agency(agency)
 
         params = {
             'command': 'vehicleLocations',
@@ -324,7 +296,30 @@ class NextBusClient():
             't': timestamp
         }
 
-        return self._perform_request(params)
+        return self._perform_request(params=params)
+
+    def _get_agency(self, agency):
+        """Get the agency name from either the provided argument or "agency" instance attribute.
+
+        Args:
+            agency: Name of a transit agency on NextBus.
+
+        Returns:
+            The value of the "agency" argument if it is not None, or the value of the instance's
+            "agency" atrribute if that is not None.
+
+        Raises:
+            ValueError: If both the value of the "agency" argument and this instance's "agency"
+                atrribute are None.
+        """
+
+        if agency is None:
+            if self.agency is None:
+                raise ValueError('"agency" is required.')
+            else:
+                return self.agency
+        else:
+            return agency
 
     def _perform_request(self, params):
         """Make a request to the NextBus API with given parameters.
