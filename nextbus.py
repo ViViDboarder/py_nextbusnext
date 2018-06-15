@@ -4,7 +4,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-log = logging.getLogger()
+LOG = logging.getLogger()
 
 NEXTBUS_XML_FEED_URL = 'http://webservices.nextbus.com/service/publicXMLFeed'
 NEXTBUS_JSON_FEED_URL = 'http://webservices.nextbus.com/service/publicJSONFeed'
@@ -223,14 +223,16 @@ class NextBusClient():
 
         for stop in stops:
             if not isinstance(stop, dict) or 'route_tag' not in stop or 'stop_id' not in stop:
-                raise ValueError('"stops" must contain dictionaries with the "route_tag" and "stop_id" keys')
+                raise ValueError('"stops" must contain dictionaries with the "route_tag" and ' \
+                                 '"stop_id" keys')
 
         agency = self._get_agency(agency)
 
         params = {
             'command': 'predictionsForMultiStops',
             # Hacky way of repeating the "stops" key in the query string for each route
-            'stops': '&stops='.join(['%s|%d' % (stop['route_tag'], stop['stop_id']) for stop in stops]),
+            'stops': '&stops='.join(['%s|%d' % (stop['route_tag'],
+                                                stop['stop_id']) for stop in stops]),
             'a': agency
         }
         return self._perform_request(params=params)
@@ -357,7 +359,7 @@ class NextBusClient():
                                          method='GET')
 
         try:
-            log.info('Making request to URL %s', url)
+            LOG.info('Making request to URL %s', url)
             with urllib.request.urlopen(request) as response:
                 response_text = response.read()
 
@@ -366,11 +368,11 @@ class NextBusClient():
                 elif self.output_format == 'xml':
                     response = response_text
 
-        except urllib.error.HTTPError as e:
-            log.error('Request returned status %s due to reason: %s', e.code, e.reason)
-            raise e
-        except json.decoder.JSONDecodeError as e:
-            log.error('Request did not return valid JSON. %s', e)
-            raise e
+        except urllib.error.HTTPError as exc:
+            LOG.error('Request returned status %s due to reason: %s', exc.code, exc.reason)
+            raise exc
+        except json.decoder.JSONDecodeError as exc:
+            LOG.error('Request did not return valid JSON. %s', exc)
+            raise exc
         else:
             return response

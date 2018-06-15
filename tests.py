@@ -1,5 +1,7 @@
 """Unit tests for nextbus.py"""
 
+# pylint: disable=unused-argument, protected-access, no-self-use, invalid-name
+
 import unittest
 import unittest.mock
 
@@ -115,22 +117,23 @@ class TestGetMessages(unittest.TestCase):
 
         client = nextbus.NextBusClient(output_format='json')
 
-        with self.assertRaises(TypeError) as e:
+        with self.assertRaises(TypeError):
             client.get_messages(route_tags={})
 
-        with self.assertRaises(TypeError) as e:
+        with self.assertRaises(TypeError):
             client.get_messages(route_tags=None)
 
-        with self.assertRaises(TypeError) as e:
+        with self.assertRaises(TypeError):
             client.get_messages(route_tags='foo')
 
-        with self.assertRaises(TypeError) as e:
+        with self.assertRaises(TypeError):
             client.get_messages(route_tags=1)
 
-        with self.assertRaises(TypeError) as e:
+        with self.assertRaises(TypeError):
             client.get_messages(route_tags=set())
 
-    def test_type_error_not_raised_if_route_tags_is_list_or_tuple(self, perform_request, get_agency):
+    def test_type_error_not_raised_if_route_tags_is_list_or_tuple(
+            self, perform_request, get_agency):
         """Test that a TypeError is not raised if the value provided for the "route_tags" is a tuple
         or a list."""
 
@@ -219,7 +222,6 @@ class TestGetRouteConfig(unittest.TestCase):
         """Test that the "r" key is not added to the parameters passed to the _perform_request
         method if the value of the route_tag argument is None."""
 
-        route_tag = 'foo'
         client = nextbus.NextBusClient(output_format='json')
         client.get_route_config(route_tag=None)
 
@@ -264,7 +266,6 @@ class TestGetPredictions(unittest.TestCase):
         """Test that the "routeTag" key is not added to the parameters passed to the
         _perform_request method if the value of the route_tag argument is None."""
 
-        route_tag = 'foo'
         client = nextbus.NextBusClient(output_format='json')
         client.get_predictions(stop_id=12345,
                                route_tag=None)
@@ -283,22 +284,22 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
 
         client = nextbus.NextBusClient(output_format='json')
 
-        with self.assertRaises(TypeError) as e:
+        with self.assertRaises(TypeError):
             client.get_predictions_for_multi_stops(stops={})
 
-        with self.assertRaises(TypeError) as e:
+        with self.assertRaises(TypeError):
             client.get_predictions_for_multi_stops(stops=set())
 
-        with self.assertRaises(TypeError) as e:
+        with self.assertRaises(TypeError):
             client.get_predictions_for_multi_stops(stops=None)
 
-        with self.assertRaises(TypeError) as e:
+        with self.assertRaises(TypeError):
             client.get_predictions_for_multi_stops(stops=True)
 
-        with self.assertRaises(TypeError) as e:
+        with self.assertRaises(TypeError):
             client.get_predictions_for_multi_stops(stops='foo')
 
-        with self.assertRaises(TypeError) as e:
+        with self.assertRaises(TypeError):
             client.get_predictions_for_multi_stops(stops=1)
 
     def test_value_error_raised_if_stops_does_not_contain_dictionaries_with_required_keys(
@@ -308,60 +309,66 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
 
         client = nextbus.NextBusClient(output_format='json')
 
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             client.get_predictions_for_multi_stops(stops=['foo'])
 
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             client.get_predictions_for_multi_stops(stops=[1])
 
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             client.get_predictions_for_multi_stops(stops=[['foo']])
 
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             client.get_predictions_for_multi_stops(stops=[{}])
 
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             client.get_predictions_for_multi_stops(stops=[{
-                                                       'stop_id': 1234
-                                                   }])
-        with self.assertRaises(ValueError) as e:
+                'stop_id': 1234
+            }])
+        with self.assertRaises(ValueError):
             client.get_predictions_for_multi_stops(stops=[{
-                                                       'route_tag': 'foo'
-                                                   }])
-        with self.assertRaises(ValueError) as e:
-            client.get_predictions_for_multi_stops(stops=[{
-                                                       'stop_id': 1234,
-                                                       'route_tag': 'foo'
-                                                   },
-                                                   None
-                                                   ])
-        with self.assertRaises(ValueError) as e:
+                'route_tag': 'foo'
+            }])
+        with self.assertRaises(ValueError):
+            client.get_predictions_for_multi_stops(
+                stops=[
+                    {
+                        'stop_id': 1234,
+                        'route_tag': 'foo'
+                    },
+                    None
+                ]
+            )
+        with self.assertRaises(ValueError):
             client.get_predictions_for_multi_stops(stops=('foo',))
 
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             client.get_predictions_for_multi_stops(stops=(1,))
 
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             client.get_predictions_for_multi_stops(stops=(('foo'),))
 
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             client.get_predictions_for_multi_stops(stops=({},))
 
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             client.get_predictions_for_multi_stops(stops=({
-                                                       'stop_id': 1234
-                                                   },))
-        with self.assertRaises(ValueError) as e:
+                'stop_id': 1234
+            },))
+        with self.assertRaises(ValueError):
             client.get_predictions_for_multi_stops(stops=({
-                                                       'route_tag': 'foo'
-                                                   },))
-        with self.assertRaises(ValueError) as e:
-            client.get_predictions_for_multi_stops(stops=({
-                                                       'stop_id': 1234,
-                                                       'route_tag': 'foo'
-                                                   },
-                                                   None
-                                                   ))
+                'route_tag': 'foo'
+            },))
+        with self.assertRaises(ValueError):
+            client.get_predictions_for_multi_stops(
+                stops=(
+                    {
+                        'stop_id': 1234,
+                        'route_tag': 'foo'
+                    },
+                    None
+                )
+            )
 
     def test_no_exceptions_raised_if_stops_is_valid(self, perform_request, get_agency):
         """Test that no exceptions are raised if the value for the "stops" argument is either a list
@@ -370,14 +377,14 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
         client = nextbus.NextBusClient(output_format='json')
 
         client.get_predictions_for_multi_stops(stops=[{
-                                                   'route_tag': 'foo',
-                                                   'stop_id': 1234
-                                               }])
+            'route_tag': 'foo',
+            'stop_id': 1234
+        }])
 
         client.get_predictions_for_multi_stops(stops=({
-                                                   'route_tag': 'foo',
-                                                   'stop_id': 1234
-                                               },))
+            'route_tag': 'foo',
+            'stop_id': 1234
+        },))
 
     def test_parameters_passed_to_perform_request(self, perform_request, get_agency):
         """Test that the correct parameters are passed to the _perform_request method."""
@@ -388,11 +395,13 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
         # Test with only one stop
         stop_id = 1234
         route_tag = 'bar'
-        client.get_predictions_for_multi_stops(stops=[{
-                                                   'route_tag': route_tag,
-                                                   'stop_id': stop_id
-                                               }],
-                                               agency=agency)
+        client.get_predictions_for_multi_stops(
+            agency=agency,
+            stops=[{
+                'route_tag': route_tag,
+                'stop_id': stop_id
+            }]
+        )
 
         get_agency.assert_called_once_with(agency)
         perform_request.assert_called_once_with(params={
@@ -408,20 +417,25 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
         first_route_tag = 'baz'
         second_stop_id = 5678
         second_route_tag = 'buz'
-        client.get_predictions_for_multi_stops(stops=[{
-                                                   'route_tag': first_route_tag,
-                                                   'stop_id': first_stop_id
-                                               },
-                                               {
-                                                   'route_tag': second_route_tag,
-                                                   'stop_id': second_stop_id
-                                               }],
-                                               agency=agency)
+        client.get_predictions_for_multi_stops(
+            agency=agency,
+            stops=[
+                {
+                    'route_tag': first_route_tag,
+                    'stop_id': first_stop_id
+                },
+                {
+                    'route_tag': second_route_tag,
+                    'stop_id': second_stop_id
+                }
+            ]
+        )
 
         perform_request.assert_called_once_with(params={
             'command': 'predictionsForMultiStops',
             'a': get_agency.return_value,
-            'stops': '%s|%s&stops=%s|%s' % (first_route_tag, first_stop_id, second_route_tag, second_stop_id)
+            'stops': '%s|%s&stops=%s|%s' % (first_route_tag, first_stop_id, second_route_tag,
+                                            second_stop_id)
         })
 
 @unittest.mock.patch('nextbus.NextBusClient._get_agency')
@@ -535,7 +549,7 @@ class TestPerformRequest(unittest.TestCase):
         client = nextbus.NextBusClient(output_format='json')
         client.output_format = 'foo'
 
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaises(ValueError):
             client._perform_request(params={})
 
     @unittest.mock.patch('nextbus.urllib.parse.urlencode')
@@ -565,7 +579,8 @@ class TestPerformRequest(unittest.TestCase):
         self.assertIn('Accept-Encoding', headers)
         self.assertEqual(headers['Accept-Encoding'], 'gzip, deflate')
 
-    def test_accept_encoding_header_not_in_request_if_use_compression_is_false(self, request, loads):
+    def test_accept_encoding_header_not_in_request_if_use_compression_is_false(
+            self, request, loads):
         """Test that the Accept-Encoding header is not present in the request to the NextBus API if
         the use_compression attribute is False."""
 
@@ -583,7 +598,9 @@ class TestPerformRequest(unittest.TestCase):
         client = nextbus.NextBusClient(output_format='json')
         response = client._perform_request(params={})
 
-        loads.assert_called_once_with(request.urlopen.return_value.__enter__.return_value.read.return_value)
+        loads.assert_called_once_with(
+            request.urlopen.return_value.__enter__.return_value.read.return_value
+        )
         self.assertEqual(response, loads.return_value)
 
     def test_response_returned_as_string_if_output_format_is_xml(self, request, loads):
@@ -593,9 +610,10 @@ class TestPerformRequest(unittest.TestCase):
         client = nextbus.NextBusClient(output_format='xml')
         response = client._perform_request(params={})
 
-        self.assertEqual(response, request.urlopen.return_value.__enter__.return_value.read.return_value)
+        self.assertEqual(response,
+                         request.urlopen.return_value.__enter__.return_value.read.return_value)
 
-    @unittest.mock.patch('nextbus.log')
+    @unittest.mock.patch('nextbus.LOG')
     def test_error_logged_if_http_error_raised(self, log, request, loads):
         """Test that an error is logged if a urllib HTTPError is raised when making the request to
         the NextBus API."""
@@ -612,7 +630,7 @@ class TestPerformRequest(unittest.TestCase):
 
         log.error.assert_called_once()
 
-    @unittest.mock.patch('nextbus.log')
+    @unittest.mock.patch('nextbus.LOG')
     def test_error_logged_if_json_decode_error_raised(self, log, request, loads):
         """Test that an error is logged if a JSONDecodeError is raised when making the request to
         the NextBus API."""
