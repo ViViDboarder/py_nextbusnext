@@ -236,17 +236,17 @@ class TestGetPredictions(unittest.TestCase):
     def test_parameters_passed_to_perform_request(self, perform_request, get_agency):
         """Test that the correct parameters are passed to the _perform_request method."""
 
-        stop_id = 12345
+        stop_tag = 12345
         agency = 'foo'
         nextbus_client = client.NextBusClient(output_format='json')
-        nextbus_client.get_predictions(stop_id=stop_id,
+        nextbus_client.get_predictions(stop_tag=stop_tag,
                                        agency=agency)
 
         get_agency.assert_called_once_with(agency)
         perform_request.assert_called_once_with(params={
             'command': 'predictions',
             'a': get_agency.return_value,
-            'stopId': stop_id
+            's': stop_tag
         })
 
     def test_route_tag_added_to_parameters_if_not_none(self, perform_request, get_agency):
@@ -255,7 +255,7 @@ class TestGetPredictions(unittest.TestCase):
 
         route_tag = 'foo'
         nextbus_client = client.NextBusClient(output_format='json')
-        nextbus_client.get_predictions(stop_id=12345,
+        nextbus_client.get_predictions(stop_tag=12345,
                                        route_tag=route_tag)
 
         params = perform_request.call_args[1]['params']
@@ -267,7 +267,7 @@ class TestGetPredictions(unittest.TestCase):
         _perform_request method if the value of the route_tag argument is None."""
 
         nextbus_client = client.NextBusClient(output_format='json')
-        nextbus_client.get_predictions(stop_id=12345,
+        nextbus_client.get_predictions(stop_tag=12345,
                                        route_tag=None)
 
         params = perform_request.call_args[1]['params']
@@ -323,7 +323,7 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             nextbus_client.get_predictions_for_multi_stops(stops=[{
-                'stop_id': 1234
+                'stop_tag': 1234
             }])
         with self.assertRaises(ValueError):
             nextbus_client.get_predictions_for_multi_stops(stops=[{
@@ -333,7 +333,7 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
             nextbus_client.get_predictions_for_multi_stops(
                 stops=[
                     {
-                        'stop_id': 1234,
+                        'stop_tag': 1234,
                         'route_tag': 'foo'
                     },
                     None
@@ -353,7 +353,7 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             nextbus_client.get_predictions_for_multi_stops(stops=({
-                'stop_id': 1234
+                'stop_tag': 1234
             },))
         with self.assertRaises(ValueError):
             nextbus_client.get_predictions_for_multi_stops(stops=({
@@ -363,7 +363,7 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
             nextbus_client.get_predictions_for_multi_stops(
                 stops=(
                     {
-                        'stop_id': 1234,
+                        'stop_tag': 1234,
                         'route_tag': 'foo'
                     },
                     None
@@ -378,12 +378,12 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
 
         nextbus_client.get_predictions_for_multi_stops(stops=[{
             'route_tag': 'foo',
-            'stop_id': 1234
+            'stop_tag': 1234
         }])
 
         nextbus_client.get_predictions_for_multi_stops(stops=({
             'route_tag': 'foo',
-            'stop_id': 1234
+            'stop_tag': 1234
         },))
 
     def test_parameters_passed_to_perform_request(self, perform_request, get_agency):
@@ -393,13 +393,13 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
         nextbus_client = client.NextBusClient(output_format='json')
 
         # Test with only one stop
-        stop_id = 1234
+        stop_tag = 1234
         route_tag = 'bar'
         nextbus_client.get_predictions_for_multi_stops(
             agency=agency,
             stops=[{
                 'route_tag': route_tag,
-                'stop_id': stop_id
+                'stop_tag': stop_tag
             }]
         )
 
@@ -407,26 +407,26 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
         perform_request.assert_called_once_with(params={
             'command': 'predictionsForMultiStops',
             'a': get_agency.return_value,
-            'stops': '%s|%s' % (route_tag, stop_id)
+            'stops': '%s|%s' % (route_tag, stop_tag)
         })
 
         perform_request.reset_mock()
 
         # Test with multiple stops
-        first_stop_id = 1234
+        first_stop_tag = 1234
         first_route_tag = 'baz'
-        second_stop_id = 5678
+        second_stop_tag = 5678
         second_route_tag = 'buz'
         nextbus_client.get_predictions_for_multi_stops(
             agency=agency,
             stops=[
                 {
                     'route_tag': first_route_tag,
-                    'stop_id': first_stop_id
+                    'stop_tag': first_stop_tag
                 },
                 {
                     'route_tag': second_route_tag,
-                    'stop_id': second_stop_id
+                    'stop_tag': second_stop_tag
                 }
             ]
         )
@@ -434,8 +434,8 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
         perform_request.assert_called_once_with(params={
             'command': 'predictionsForMultiStops',
             'a': get_agency.return_value,
-            'stops': '%s|%s&stops=%s|%s' % (first_route_tag, first_stop_id, second_route_tag,
-                                            second_stop_id)
+            'stops': '%s|%s&stops=%s|%s' % (first_route_tag, first_stop_tag, second_route_tag,
+                                            second_stop_tag)
         })
 
 @unittest.mock.patch('client.NextBusClient._get_agency')
@@ -561,7 +561,7 @@ class TestPerformRequest(unittest.TestCase):
         nextbus_client = client.NextBusClient(output_format='json')
         nextbus_client._perform_request(params=params)
 
-        urlencode.assert_called_once_with(params)
+        urlencode.assert_called_once_with(params, safe='&=')
         # Get the URL of the request to the NextBus API
         request_url = request.Request.call_args[1]['url']
         assert request_url.endswith('?%s' % urlencode.return_value)

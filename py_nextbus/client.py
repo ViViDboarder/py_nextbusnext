@@ -159,13 +159,13 @@ class NextBusClient():
 
         return self._perform_request(params=params)
 
-    def get_predictions(self, stop_id, route_tag=None, agency=None):
+    def get_predictions(self, stop_tag, route_tag=None, agency=None):
         """Make a request to the NextBus API with the "predictions" command to get arrival time
         predictions for a single stop. A route tag can optionally be provided to filter the
         predictions down to only that particular route at the stop.
 
         Arguments:
-            stop_id: (Integer) ID of a stop on NextBus.
+            stop_tag: (String) Tag identifying a stop on NextBus.
             route_tag: (String) The NextBus route tag for a route. If this is None, predictions for
                 all routes that serve the given stop will be returned.
             agency: (String) Name of a transit agency on NextBus. This must be provided if the
@@ -187,7 +187,7 @@ class NextBusClient():
         params = {
             'command': 'predictions',
             'a': agency,
-            'stopId': stop_id
+            's': stop_tag
         }
 
         if route_tag is not None:
@@ -202,7 +202,7 @@ class NextBusClient():
         Arguments:
             stops: (List or tuple) List or tuple of dictionaries identifying the combinations of
                 routes and stops to get predictions for. Each dictionary must contain the keys
-                "stop_id" and "route_tag", indicating each stop to get predictions for, and the
+                "stop_tag" and "route_tag", indicating each stop to get predictions for, and the
                 route to get predictions for at that stop, respectively.
             agency: (String) Name of a transit agency on NextBus. This must be provided if the
                 "agency" instance attribute has not been set.
@@ -222,9 +222,9 @@ class NextBusClient():
             raise TypeError('"stops" must be a list or a tuple.')
 
         for stop in stops:
-            if not isinstance(stop, dict) or 'route_tag' not in stop or 'stop_id' not in stop:
+            if not isinstance(stop, dict) or 'route_tag' not in stop or 'stop_tag' not in stop:
                 raise ValueError('"stops" must contain dictionaries with the "route_tag" and ' \
-                                 '"stop_id" keys')
+                                 '"stop_tag" keys')
 
         agency = self._get_agency(agency)
 
@@ -232,7 +232,7 @@ class NextBusClient():
             'command': 'predictionsForMultiStops',
             # Hacky way of repeating the "stops" key in the query string for each route
             'stops': '&stops='.join(['%s|%d' % (stop['route_tag'],
-                                                stop['stop_id']) for stop in stops]),
+                                                stop['stop_tag']) for stop in stops]),
             'a': agency
         }
         return self._perform_request(params=params)
@@ -347,7 +347,7 @@ class NextBusClient():
         else:
             raise ValueError('Invalid output_format: %s' % self.output_format)
 
-        url = '%s?%s' % (base_url, urllib.parse.urlencode(params))
+        url = '%s?%s' % (base_url, urllib.parse.urlencode(params, safe='&='))
 
         headers = {}
 
