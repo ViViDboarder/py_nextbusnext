@@ -237,41 +237,20 @@ class TestGetPredictions(unittest.TestCase):
         """Test that the correct parameters are passed to the _perform_request method."""
 
         stop_tag = 12345
+        route_tag = 'foo'
         agency = 'foo'
         nextbus_client = client.NextBusClient(output_format='json')
         nextbus_client.get_predictions(stop_tag=stop_tag,
+                                       route_tag=route_tag,
                                        agency=agency)
 
         get_agency.assert_called_once_with(agency)
         perform_request.assert_called_once_with(params={
             'command': 'predictions',
             'a': get_agency.return_value,
-            's': stop_tag
+            's': stop_tag,
+            'r': route_tag,
         })
-
-    def test_route_tag_added_to_parameters_if_not_none(self, perform_request, get_agency):
-        """Test that the "routeTag" key is added to the parameters passed to the the
-        _perform_request method if the value of the route_tag argument is not None."""
-
-        route_tag = 'foo'
-        nextbus_client = client.NextBusClient(output_format='json')
-        nextbus_client.get_predictions(stop_tag=12345,
-                                       route_tag=route_tag)
-
-        params = perform_request.call_args[1]['params']
-        self.assertIn('routeTag', params)
-        self.assertEqual(params['routeTag'], route_tag)
-
-    def test_route_tag_not_added_to_parameters_if_none(self, perform_request, get_agency):
-        """Test that the "routeTag" key is not added to the parameters passed to the
-        _perform_request method if the value of the route_tag argument is None."""
-
-        nextbus_client = client.NextBusClient(output_format='json')
-        nextbus_client.get_predictions(stop_tag=12345,
-                                       route_tag=None)
-
-        params = perform_request.call_args[1]['params']
-        self.assertNotIn('routeTag', params)
 
 @unittest.mock.patch('client.NextBusClient._get_agency')
 @unittest.mock.patch('client.NextBusClient._perform_request')

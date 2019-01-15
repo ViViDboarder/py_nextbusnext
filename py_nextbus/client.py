@@ -159,7 +159,7 @@ class NextBusClient():
 
         return self._perform_request(params=params)
 
-    def get_predictions(self, stop_tag, route_tag=None, agency=None):
+    def get_predictions(self, stop_tag, route_tag, agency=None):
         """Make a request to the NextBus API with the "predictions" command to get arrival time
         predictions for a single stop. A route tag can optionally be provided to filter the
         predictions down to only that particular route at the stop.
@@ -187,11 +187,9 @@ class NextBusClient():
         params = {
             'command': 'predictions',
             'a': agency,
-            's': stop_tag
+            's': stop_tag,
+            'r': route_tag,
         }
-
-        if route_tag is not None:
-            params['routeTag'] = route_tag
 
         return self._perform_request(params=params)
 
