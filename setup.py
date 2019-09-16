@@ -4,15 +4,15 @@ with open('README.md', 'r') as readme:
     long_description = readme.read()
 
 setup(
-    name='py_nextbus',
-    version='0.1.2',
-    author='Pierre Maris',
+    name='py_nextbusnext',
+    version='0.1.3',
+    author='ViViDboarder',
     description='Minimalistic Python client for the NextBus public API for real-time transit ' \
                 'arrival data',
     long_description=long_description,
     long_description_content_type="text/markdown",
     test_suite='tests.py',
-    url='https://github.com/pmaris/py_nextbus',
+    url='https://github.com/vividboarder/py_nextbus',
     packages=find_packages(),
     python_requires='>=3',
     classifiers=(

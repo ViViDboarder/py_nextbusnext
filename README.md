@@ -1,3 +1,8 @@
+# py_nextbusnext
+
+## This is forked from py_nextbus for maintanence
+_It is API compatible to the upstream_
+
 A minimalistic Python 3 client to simplify making requests to the NextBus API. Response content can be returned as either JSON or XML, using the respective NextBus public feed.
 
 All commands in the NextBus API as of revision 1.23 are supported.
@@ -9,9 +14,9 @@ Note: Other than the output format, the NextBus XML feed and JSON feeds are the 
 Installation
 ---
 
-Install with Pip:
+Install with pip:
 
-`pip install py-nextbus`
+`pip install py-nextbusnext`
 
 Usage
 ---
