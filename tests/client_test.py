@@ -1,11 +1,10 @@
 """Unit tests for client.py"""
-
 # pylint: disable=unused-argument, protected-access, no-self-use, invalid-name
-
 import unittest
 import unittest.mock
 
-import client
+import py_nextbus.client as client
+
 
 class TestInit(unittest.TestCase):
     """Tests for the constructor of the NextBusClient class."""
@@ -91,7 +90,8 @@ class TestInit(unittest.TestCase):
         self.assertEqual(nextbus_client.agency, agency)
         self.assertEqual(nextbus_client.use_compression, use_compression)
 
-@unittest.mock.patch('client.NextBusClient._perform_request')
+
+@unittest.mock.patch('py_nextbus.client.NextBusClient._perform_request')
 class TestGetAgencyList(unittest.TestCase):
     """Tests for the get_agency_list method in the NextBusClient class."""
 
@@ -106,8 +106,9 @@ class TestGetAgencyList(unittest.TestCase):
         self.assertIn('command', params)
         self.assertEqual(params['command'], 'agencyList')
 
-@unittest.mock.patch('client.NextBusClient._get_agency')
-@unittest.mock.patch('client.NextBusClient._perform_request')
+
+@unittest.mock.patch('py_nextbus.client.NextBusClient._get_agency')
+@unittest.mock.patch('py_nextbus.client.NextBusClient._perform_request')
 class TestGetMessages(unittest.TestCase):
     """Tests for the get_messages method in the NextBusClient class."""
 
@@ -170,8 +171,9 @@ class TestGetMessages(unittest.TestCase):
             'r': 'foo&r=bar'
         })
 
-@unittest.mock.patch('client.NextBusClient._get_agency')
-@unittest.mock.patch('client.NextBusClient._perform_request')
+
+@unittest.mock.patch('py_nextbus.client.NextBusClient._get_agency')
+@unittest.mock.patch('py_nextbus.client.NextBusClient._perform_request')
 class TestGetRouteList(unittest.TestCase):
     """Tests for the get_route_list method in the NextBusClient class."""
 
@@ -188,8 +190,9 @@ class TestGetRouteList(unittest.TestCase):
             'a': get_agency.return_value
         })
 
-@unittest.mock.patch('client.NextBusClient._get_agency')
-@unittest.mock.patch('client.NextBusClient._perform_request')
+
+@unittest.mock.patch('py_nextbus.client.NextBusClient._get_agency')
+@unittest.mock.patch('py_nextbus.client.NextBusClient._perform_request')
 class TestGetRouteConfig(unittest.TestCase):
     """Tests for the get_route_config method in the NextBusClient class."""
 
@@ -228,8 +231,9 @@ class TestGetRouteConfig(unittest.TestCase):
         params = perform_request.call_args[1]['params']
         self.assertNotIn('r', params)
 
-@unittest.mock.patch('client.NextBusClient._get_agency')
-@unittest.mock.patch('client.NextBusClient._perform_request')
+
+@unittest.mock.patch('py_nextbus.client.NextBusClient._get_agency')
+@unittest.mock.patch('py_nextbus.client.NextBusClient._perform_request')
 class TestGetPredictions(unittest.TestCase):
     """Tests for the get_predictions method in the NextBusClient class."""
 
@@ -252,8 +256,9 @@ class TestGetPredictions(unittest.TestCase):
             'r': route_tag,
         })
 
-@unittest.mock.patch('client.NextBusClient._get_agency')
-@unittest.mock.patch('client.NextBusClient._perform_request')
+
+@unittest.mock.patch('py_nextbus.client.NextBusClient._get_agency')
+@unittest.mock.patch('py_nextbus.client.NextBusClient._perform_request')
 class TestGetPredictionsForMultiStops(unittest.TestCase):
     """Tests for the get_predictions_for_multi_stops method in the NextBusClient class."""
 
@@ -355,15 +360,27 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
 
         nextbus_client = client.NextBusClient(output_format='json')
 
-        nextbus_client.get_predictions_for_multi_stops(stops=[{
-            'route_tag': 'foo',
-            'stop_tag': 1234
-        }])
+        nextbus_client.get_predictions_for_multi_stops(stops=[
+            {
+                'route_tag': 'foo',
+                'stop_tag': 1234
+            },
+            {
+                'route_tag': 'foo',
+                'stop_tag': 'bar',
+            },
+        ])
 
-        nextbus_client.get_predictions_for_multi_stops(stops=({
-            'route_tag': 'foo',
-            'stop_tag': 1234
-        },))
+        nextbus_client.get_predictions_for_multi_stops(stops=(
+            {
+                'route_tag': 'foo',
+                'stop_tag': 1234
+            },
+            {
+                'route_tag': 'foo',
+                'stop_tag': 'bar'
+            },
+        ))
 
     def test_parameters_passed_to_perform_request(self, perform_request, get_agency):
         """Test that the correct parameters are passed to the _perform_request method."""
@@ -386,7 +403,7 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
         perform_request.assert_called_once_with(params={
             'command': 'predictionsForMultiStops',
             'a': get_agency.return_value,
-            'stops': '%s|%s' % (route_tag, stop_tag)
+            'stops': '{}|{}'.format(route_tag, stop_tag)
         })
 
         perform_request.reset_mock()
@@ -413,12 +430,15 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
         perform_request.assert_called_once_with(params={
             'command': 'predictionsForMultiStops',
             'a': get_agency.return_value,
-            'stops': '%s|%s&stops=%s|%s' % (first_route_tag, first_stop_tag, second_route_tag,
-                                            second_stop_tag)
+            'stops': '{}|{}&stops={}|{}'.format(
+                first_route_tag, first_stop_tag,
+                second_route_tag, second_stop_tag
+            )
         })
 
-@unittest.mock.patch('client.NextBusClient._get_agency')
-@unittest.mock.patch('client.NextBusClient._perform_request')
+
+@unittest.mock.patch('py_nextbus.client.NextBusClient._get_agency')
+@unittest.mock.patch('py_nextbus.client.NextBusClient._perform_request')
 class TestGetSchedule(unittest.TestCase):
     """Tests for the get_schedule method in the NextBusClient class."""
 
@@ -435,8 +455,9 @@ class TestGetSchedule(unittest.TestCase):
             'r': route_tag
         })
 
-@unittest.mock.patch('client.NextBusClient._get_agency')
-@unittest.mock.patch('client.NextBusClient._perform_request')
+
+@unittest.mock.patch('py_nextbus.client.NextBusClient._get_agency')
+@unittest.mock.patch('py_nextbus.client.NextBusClient._perform_request')
 class TestGetVehicleLocations(unittest.TestCase):
     """Tests for the get_vehicle_locations method in the NextBusClient class."""
 
@@ -455,6 +476,7 @@ class TestGetVehicleLocations(unittest.TestCase):
             'r': route_tag,
             't': timestamp
         })
+
 
 class TestGetAgency(unittest.TestCase):
     """Tests for the _get_agency method in the NextBusClient class."""
@@ -492,8 +514,9 @@ class TestGetAgency(unittest.TestCase):
         with self.assertRaises(ValueError):
             nextbus_client._get_agency(None)
 
-@unittest.mock.patch('client.json.loads')
-@unittest.mock.patch('client.urllib.request')
+
+@unittest.mock.patch('py_nextbus.client.json.loads')
+@unittest.mock.patch('py_nextbus.client.urllib.request')
 class TestPerformRequest(unittest.TestCase):
     """Tests for the _perform_request method in the NextBusClient class."""
 
@@ -531,7 +554,7 @@ class TestPerformRequest(unittest.TestCase):
         with self.assertRaises(ValueError):
             nextbus_client._perform_request(params={})
 
-    @unittest.mock.patch('client.urllib.parse.urlencode')
+    @unittest.mock.patch('py_nextbus.client.urllib.parse.urlencode')
     def test_parameters_added_to_url_as_query_string(self, urlencode, request, loads):
         """Test that the provided parameters are converted to a query string and added to the URL
         used for making a request to the NextBus API."""
@@ -592,7 +615,7 @@ class TestPerformRequest(unittest.TestCase):
         self.assertEqual(response,
                          request.urlopen.return_value.__enter__.return_value.read.return_value)
 
-    @unittest.mock.patch('client.LOG')
+    @unittest.mock.patch('py_nextbus.client.LOG')
     def test_error_logged_if_http_error_raised(self, log, request, loads):
         """Test that an error is logged if a urllib HTTPError is raised when making the request to
         the NextBus API."""
@@ -609,7 +632,7 @@ class TestPerformRequest(unittest.TestCase):
 
         log.error.assert_called_once()
 
-    @unittest.mock.patch('client.LOG')
+    @unittest.mock.patch('py_nextbus.client.LOG')
     def test_error_logged_if_json_decode_error_raised(self, log, request, loads):
         """Test that an error is logged if a JSONDecodeError is raised when making the request to
         the NextBus API."""
@@ -623,6 +646,7 @@ class TestPerformRequest(unittest.TestCase):
             nextbus_client._perform_request(params={})
 
         log.error.assert_called_once()
+
 
 if __name__ == '__main__':
     unittest.main()

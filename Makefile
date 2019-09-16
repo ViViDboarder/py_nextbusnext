@@ -1,4 +1,3 @@
-OPEN_CMD := $(shell type xdg-open &> /dev/null && echo 'xdg-open' || echo 'open')
 ENV := env
 
 .PHONY: default
@@ -9,10 +8,6 @@ $(ENV):
 	python3 -m venv $(ENV)
 	$(ENV)/bin/pip install -e .
 
-# Install tox into virtualenv for running tests
-$(ENV)/bin/tox: $(ENV)
-	$(ENV)/bin/pip install tox
-
 # Install wheel for building packages
 $(ENV)/bin/wheel: $(ENV)
 	$(ENV)/bin/pip install wheel
@@ -21,23 +16,23 @@ $(ENV)/bin/wheel: $(ENV)
 $(ENV)/bin/twine: $(ENV)
 	$(ENV)/bin/pip install twine
 
-# Installs dev requirements to virtualenv
-.PHONY: devenv
-devenv: $(ENV)
+# Install pre-commit and other devenv items
+$(ENV)/bin/pre-commit: $(ENV)
 	$(ENV)/bin/pip install -r ./requirements-dev.txt
 
-# Generates a smaller env for running tox, which builds it's own env
-.PHONY: test-env
-test-env: $(ENV)/bin/tox
+# Installs dev requirements to virtualenv
+.PHONY: devenv
+devenv: $(ENV)/bin/pre-commit
 
 # Generates a small build env for building and uploading dists
 .PHONY: build-env
 build-env: $(ENV)/bin/twine $(ENV)/bin/wheel
 
-# Runs tests with tox
+# Runs tests
 .PHONY: test
-test: $(ENV)/bin/tox
-	$(ENV)/bin/tox -e py3
+test: $(ENV) $(ENV)/bin/pre-commit
+	$(ENV)/bin/python -m unittest discover -p "*_test.py"
+	$(ENV)/bin/pre-commit run --all-files
 
 # Builds wheel for package to upload
 .PHONY: build
@@ -64,7 +59,7 @@ upload-test: verify-tag-version build $(ENV)/bin/twine
 # Cleans all build, runtime, and test artifacts
 .PHONY: clean
 clean:
-	rm -fr ./build ./py_nextbus.egg-info ./htmlcov ./.coverage ./.pytest_cache ./.tox
+	rm -fr ./build ./py_nextbus.egg-info
 	find . -name '*.pyc' -delete
 	find . -name '__pycache__' -delete
 
@@ -75,18 +70,5 @@ dist-clean: clean
 
 # Install pre-commit hooks
 .PHONY: install-hooks
-install-hooks: $(ENV)
-	$(ENV)/bin/tox -e pre-commit -- install -f --install-hooks
-
-# Generates test coverage
-.coverage:
-	$(ENV)/bin/tox
-
-# Builds coverage html
-htmlcov/index.html: .coverage
-	$(ENV)/bin/coverage html
-
-# Opens coverage html in browser (on macOS and some Linux systems)
-.PHONY: open-coverage
-open-coverage: htmlcov/index.html
-	$(OPEN_CMD) htmlcov/index.html
+install-hooks:  $(ENV)/bin/pre-commit
+	$(ENV)/bin/pre-commit install -f --install-hooks

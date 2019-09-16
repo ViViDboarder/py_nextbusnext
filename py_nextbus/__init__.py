@@ -1,3 +1,2 @@
+from .client import NextBusClient  # NOQA
 name = "py_nextbus"
-
-from .client import NextBusClient

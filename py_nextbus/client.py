@@ -9,6 +9,7 @@ LOG = logging.getLogger()
 NEXTBUS_XML_FEED_URL = 'http://webservices.nextbus.com/service/publicXMLFeed'
 NEXTBUS_JSON_FEED_URL = 'http://webservices.nextbus.com/service/publicJSONFeed'
 
+
 class NextBusClient():
     """Minimalistic client for making requests using the NextBus API.
 
@@ -166,8 +167,7 @@ class NextBusClient():
 
         Arguments:
             stop_tag: (String) Tag identifying a stop on NextBus.
-            route_tag: (String) The NextBus route tag for a route. If this is None, predictions for
-                all routes that serve the given stop will be returned.
+            route_tag: (String) The NextBus route tag for a route.
             agency: (String) Name of a transit agency on NextBus. This must be provided if the
                 "agency" instance attribute has not been set.
 
@@ -221,7 +221,7 @@ class NextBusClient():
 
         for stop in stops:
             if not isinstance(stop, dict) or 'route_tag' not in stop or 'stop_tag' not in stop:
-                raise ValueError('"stops" must contain dictionaries with the "route_tag" and ' \
+                raise ValueError('"stops" must contain dictionaries with the "route_tag" and '
                                  '"stop_tag" keys')
 
         agency = self._get_agency(agency)
@@ -229,8 +229,12 @@ class NextBusClient():
         params = {
             'command': 'predictionsForMultiStops',
             # Hacky way of repeating the "stops" key in the query string for each route
-            'stops': '&stops='.join(['%s|%d' % (stop['route_tag'],
-                                                stop['stop_tag']) for stop in stops]),
+            'stops': '&stops='.join([
+                '{}|{}'.format(
+                    stop['route_tag'],
+                    stop['stop_tag'],
+                ) for stop in stops
+            ]),
             'a': agency
         }
         return self._perform_request(params=params)
