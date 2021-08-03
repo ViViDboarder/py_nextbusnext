@@ -7,7 +7,7 @@ A minimalistic Python 3 client to simplify making requests to the NextBus API. R
 
 All commands in the NextBus API as of revision 1.23 are supported.
 
-See the NextBus XML feed documentation for more information: https://www.nextbus.com/xmlFeedDocs/NextBusXMLFeed.pdf
+See the NextBus XML feed documentation for more information: https://retro.umoiq.com/xmlFeedDocs/NextBusXMLFeed.pdf
 
 Note: Other than the output format, the NextBus XML feed and JSON feeds are the same. The XML feed documentation also applies to the JSON feed.
 

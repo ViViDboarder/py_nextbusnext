@@ -6,8 +6,8 @@ import urllib.request
 
 LOG = logging.getLogger()
 
-NEXTBUS_XML_FEED_URL = 'http://webservices.nextbus.com/service/publicXMLFeed'
-NEXTBUS_JSON_FEED_URL = 'http://webservices.nextbus.com/service/publicJSONFeed'
+NEXTBUS_XML_FEED_URL = 'https://retro.umoiq.com/service/publicXMLFeed'
+NEXTBUS_JSON_FEED_URL = 'https://retro.umoiq.com/service/publicJSONFeed'
 
 
 class NextBusClient():
