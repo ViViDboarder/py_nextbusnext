@@ -42,9 +42,9 @@ build: $(ENV)/bin/wheel
 
 # Verify that the python version matches the git tag so we don't push bad shas
 .PHONY: verify-tag-version
-verify-tag-version:
+verify-tag-version: $(ENV)/bin/wheel
 	$(eval TAG_NAME = $(shell [ -n "$(DRONE_TAG)" ] && echo $(DRONE_TAG) || git describe --tags --exact-match))
-	test "v$(shell python setup.py -V)" = "$(TAG_NAME)"
+	test "v$(shell $(ENV)/bin/python setup.py -V)" = "$(TAG_NAME)"
 
 # Uses twine to upload to pypi
 .PHONY: upload
