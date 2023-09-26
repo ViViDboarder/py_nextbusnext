@@ -9,6 +9,9 @@ LOG = logging.getLogger()
 NEXTBUS_XML_FEED_URL = 'https://retro.umoiq.com/service/publicXMLFeed'
 NEXTBUS_JSON_FEED_URL = 'https://retro.umoiq.com/service/publicJSONFeed'
 
+JSON_FORMAT = "json"
+XML_FORMAT = "xml"
+
 
 class NextBusClient():
     """Minimalistic client for making requests using the NextBus API.
@@ -19,7 +22,7 @@ class NextBusClient():
 
     All commands in revision 1.23 of the NextBus API are supported."""
 
-    def __init__(self, output_format, agency=None, use_compression=True):
+    def __init__(self, output_format=JSON_FORMAT, agency=None, use_compression=True):
         """Arguments:
             output_format: (String) Indicates the format of the data returned by requests, either
                 "json" or "xml".
@@ -33,7 +36,7 @@ class NextBusClient():
         if not isinstance(output_format, str):
             raise TypeError('"output_format" must be a string.')
 
-        if output_format.lower() not in ['json', 'xml']:
+        if output_format.lower() not in (JSON_FORMAT, XML_FORMAT):
             raise ValueError('"output_format" must be either "json" or "xml".')
 
         if not isinstance(use_compression, bool):
@@ -365,9 +368,9 @@ class NextBusClient():
             with urllib.request.urlopen(request) as response:
                 response_text = response.read()
 
-                if self.output_format == 'json':
+                if self.output_format == JSON_FORMAT:
                     response = json.loads(response_text)
-                elif self.output_format == 'xml':
+                elif self.output_format == XML_FORMAT:
                     response = response_text
 
         except urllib.error.HTTPError as exc:
