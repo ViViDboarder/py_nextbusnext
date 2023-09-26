@@ -1,8 +1,8 @@
 import json
 import logging
-import urllib.error
 import urllib.parse
 import urllib.request
+from urllib.error import HTTPError
 
 LOG = logging.getLogger()
 
@@ -11,6 +11,16 @@ NEXTBUS_JSON_FEED_URL = 'https://retro.umoiq.com/service/publicJSONFeed'
 
 JSON_FORMAT = "json"
 XML_FORMAT = "xml"
+
+
+class NextBusHTTPError(HTTPError):
+    def __init__(self, message: str, http_err: HTTPError):
+        self.__dict__.update(http_err.__dict__)
+        self.message = message
+
+
+class NextBusFormatError(ValueError):
+    """Error with parsing a NextBus response."""
 
 
 class NextBusClient():
@@ -55,9 +65,9 @@ class NextBusClient():
             If the output_format is "xml": String containing the XML returned by the request.
 
         Raises:
-            urllib.error.HTTPError: If an HTTP error occurs when making the request to the NextBus
+            NextBusHTTPError: If an HTTP error occurs when making the request to the NextBus
                 API.
-            json.decoder.JSONDecodeError: If the output_format is "json" and the response was not
+            NextBusFormatError: If the output_format is "json" and the response was not
                 valid JSON.
         """
 
@@ -82,9 +92,9 @@ class NextBusClient():
             If the output_format is "xml": String containing the XML returned by the request.
 
         Raises:
-            urllib.error.HTTPError: If an HTTP error occurs when making the request to the NextBus
+            NextBusHTTPError: If an HTTP error occurs when making the request to the NextBus
                 API.
-            json.decoder.JSONDecodeError: If the output_format is "json" and the response was not
+            NextBusFormatError: If the output_format is "json" and the response was not
                 valid JSON.
         """
 
@@ -115,9 +125,9 @@ class NextBusClient():
             If the output_format is "xml": String containing the XML returned by the request.
 
         Raises:
-            urllib.error.HTTPError: If an HTTP error occurs when making the request to the NextBus
+            NextBusHTTPError: If an HTTP error occurs when making the request to the NextBus
                 API.
-            json.decoder.JSONDecodeError: If the output_format is "json" and the response was not
+            NextBusFormatError: If the output_format is "json" and the response was not
                 valid JSON.
         """
 
@@ -145,9 +155,9 @@ class NextBusClient():
             If the output_format is "xml": String containing the XML returned by the request.
 
         Raises:
-            urllib.error.HTTPError: If an HTTP error occurs when making the request to the NextBus
+            NextBusHTTPError: If an HTTP error occurs when making the request to the NextBus
                 API.
-            json.decoder.JSONDecodeError: If the output_format is "json" and the response was not
+            NextBusFormatError: If the output_format is "json" and the response was not
                 valid JSON.
         """
 
@@ -179,9 +189,9 @@ class NextBusClient():
             If the output_format is "xml": String containing the XML returned by the request.
 
         Raises:
-            urllib.error.HTTPError: If an HTTP error occurs when making the request to the NextBus
+            NextBusHTTPError: If an HTTP error occurs when making the request to the NextBus
                 API.
-            json.decoder.JSONDecodeError: If the output_format is "json" and the response was not
+            NextBusFormatError: If the output_format is "json" and the response was not
                 valid JSON.
         """
 
@@ -213,9 +223,9 @@ class NextBusClient():
             If the output_format is "xml": String containing the XML returned by the request.
 
         Raises:
-            urllib.error.HTTPError: If an HTTP error occurs when making the request to the NextBus
+            NextBusHTTPError: If an HTTP error occurs when making the request to the NextBus
                 API.
-            json.decoder.JSONDecodeError: If the output_format is "json" and the response was not
+            NextBusFormatError: If the output_format is "json" and the response was not
                 valid JSON.
         """
 
@@ -256,9 +266,9 @@ class NextBusClient():
             If the output_format is "xml": String containing the XML returned by the request.
 
         Raises:
-            urllib.error.HTTPError: If an HTTP error occurs when making the request to the NextBus
+            NextBusHTTPError: If an HTTP error occurs when making the request to the NextBus
                 API.
-            json.decoder.JSONDecodeError: If the output_format is "json" and the response was not
+            NextBusFormatError: If the output_format is "json" and the response was not
                 valid JSON.
         """
 
@@ -288,9 +298,9 @@ class NextBusClient():
             If the output_format is "xml": String containing the XML returned by the request.
 
         Raises:
-            urllib.error.HTTPError: If an HTTP error occurs when making the request to the NextBus
+            NextBusHTTPError: If an HTTP error occurs when making the request to the NextBus
                 API.
-            json.decoder.JSONDecodeError: If the output_format is "json" and the response was not
+            NextBusFormatError: If the output_format is "json" and the response was not
                 valid JSON.
         """
 
@@ -339,9 +349,9 @@ class NextBusClient():
             If the output_format is "xml": String containing the XML returned by the request.
 
         Raises:
-            urllib.error.HTTPError: If an HTTP error occurs when making the request to the NextBus
+            NextBusHTTPError: If an HTTP error occurs when making the request to the NextBus
                 API.
-            json.decoder.JSONDecodeError: If the output_format is "json" and the response was not
+            NextBusFormatError: If the output_format is "json" and the response was not
                 valid JSON.
         """
 
@@ -372,12 +382,12 @@ class NextBusClient():
                     response = json.loads(response_text)
                 elif self.output_format == XML_FORMAT:
                     response = response_text
+                else:
+                    raise NextBusFormatError(f"Unexpected format: {self.output_format}")
 
-        except urllib.error.HTTPError as exc:
-            LOG.error('Request returned status %s due to reason: %s', exc.code, exc.reason)
-            raise exc
+        except HTTPError as exc:
+            raise NextBusHTTPError("Error from the NextBus API", exc) from exc
         except json.decoder.JSONDecodeError as exc:
-            LOG.error('Request did not return valid JSON. %s', exc)
-            raise exc
-        else:
-            return response
+            raise NextBusFormatError("Failed to parse JSON from request") from exc
+
+        return response
