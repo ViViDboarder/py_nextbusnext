@@ -1,16 +1,26 @@
+from __future__ import annotations
+
 import json
 import logging
-import urllib.parse
 import urllib.request
+from collections.abc import Iterable
+from collections.abc import Sequence
+from datetime import datetime
+from enum import Enum
+from typing import Any
+from typing import NamedTuple
 from urllib.error import HTTPError
+from urllib.parse import urlencode
 
 LOG = logging.getLogger()
 
-NEXTBUS_XML_FEED_URL = 'https://retro.umoiq.com/service/publicXMLFeed'
-NEXTBUS_JSON_FEED_URL = 'https://retro.umoiq.com/service/publicJSONFeed'
+NEXTBUS_XML_FEED_URL = "https://retro.umoiq.com/service/publicXMLFeed"
+NEXTBUS_JSON_FEED_URL = "https://retro.umoiq.com/service/publicJSONFeed"
 
-JSON_FORMAT = "json"
-XML_FORMAT = "xml"
+
+class ReturnFormat(Enum):
+    JSON = "json"
+    XML = "xml"
 
 
 class NextBusHTTPError(HTTPError):
@@ -23,7 +33,19 @@ class NextBusFormatError(ValueError):
     """Error with parsing a NextBus response."""
 
 
-class NextBusClient():
+class RouteStop(NamedTuple):
+    route_tag: str
+    stop_tag: str | int
+
+    def __str__(self) -> str:
+        return f"{self.route_tag}|{self.stop_tag}"
+
+    @classmethod
+    def from_dict(cls, legacy_dict: dict[str, str]) -> RouteStop:
+        return cls(legacy_dict["route_tag"], legacy_dict["stop_tag"])
+
+
+class NextBusClient:
     """Minimalistic client for making requests using the NextBus API.
 
     This client makes no assumptions about the structure of the data returned by requests to
@@ -32,31 +54,32 @@ class NextBusClient():
 
     All commands in revision 1.23 of the NextBus API are supported."""
 
-    def __init__(self, output_format=JSON_FORMAT, agency=None, use_compression=True):
+    def __init__(
+        self,
+        output_format: ReturnFormat | str = ReturnFormat.JSON,
+        agency: str | None = None,
+        use_compression=True,
+    ) -> None:
         """Arguments:
-            output_format: (String) Indicates the format of the data returned by requests, either
-                "json" or "xml".
-            agency: (String) Name of a transit agency on NextBus. If an agency is specified for an
-                instance of this class, an agency does not have to be provided with every request to
-                the NextBus API (Other than the agencyList command).
-            use_compression (Boolean) Indicates whether the response data from requests to NextBus
-                should be compressed.
+        output_format: (ReturnFormat[str]) Indicates the format of the data returned by requests,
+            either ReturnFormat.JSON or ReturnFormat.XML.
+        agency: (String) Name of a transit agency on NextBus. If an agency is specified for an
+            instance of this class, an agency does not have to be provided with every request to
+            the NextBus API (Other than the agencyList command).
+        use_compression (Boolean) Indicates whether the response data from requests to NextBus
+            should be compressed. Defaults to True.
         """
 
-        if not isinstance(output_format, str):
-            raise TypeError('"output_format" must be a string.')
+        if isinstance(output_format, str):
+            output_format = ReturnFormat(output_format.lower())
+        if not isinstance(output_format, ReturnFormat):
+            raise TypeError("output_format must be a valid ReturnFormat")
 
-        if output_format.lower() not in (JSON_FORMAT, XML_FORMAT):
-            raise ValueError('"output_format" must be either "json" or "xml".')
-
-        if not isinstance(use_compression, bool):
-            raise TypeError('"use_compression" must be a boolean.')
-
-        self.output_format = output_format.lower()
+        self.output_format = output_format
         self.agency = agency
         self.use_compression = use_compression
 
-    def get_agency_list(self):
+    def get_agency_list(self) -> dict[str, Any] | str:
         """Make a request to the NextBus API with the "agencyList" command to get the list of
         transit agencies with predictions on NextBus.
 
@@ -71,19 +94,19 @@ class NextBusClient():
                 valid JSON.
         """
 
-        params = {
-            'command': 'agencyList'
-        }
+        params = {"command": "agencyList"}
 
         return self._perform_request(params=params)
 
-    def get_messages(self, route_tags, agency=None):
+    def get_messages(
+        self, route_tags: Iterable[str], agency: str | None = None
+    ) -> dict[str, Any] | str:
         """Make a request to the NextBus API with the "messages" command to get currently active
         messages to display for multiple routes.
 
         Arguments:
-            route_tags: (List or tuple) List of NextBus route tags for the routes to get messages
-                for.
+            route_tags: (Sequence of Strings) List of NextBus route tags for the routes to get
+                messages for.
             agency: (String) Name of a transit agency on NextBus. This must be provided if the
                 "agency" instance attribute has not been set.
 
@@ -98,21 +121,21 @@ class NextBusClient():
                 valid JSON.
         """
 
-        if not isinstance(route_tags, list) and not isinstance(route_tags, tuple):
-            raise TypeError('"route_tags" must be a list or tuple.')
+        if not isinstance(route_tags, Iterable) or isinstance(route_tags, str):
+            raise TypeError('"route_tags" must be a Sequence but not a single string.')
 
         agency = self._get_agency(agency)
 
         params = {
-            'command': 'messages',
+            "command": "messages",
             # Hacky way of repeating the "r" key in the query string for each route
-            'r': '&r='.join(route_tags),
-            'a': agency
+            "r": "&r=".join(route_tags),
+            "a": agency,
         }
 
         return self._perform_request(params=params)
 
-    def get_route_list(self, agency=None):
+    def get_route_list(self, agency: str | None = None) -> dict[str, Any] | str:
         """Make a request to the NextBus API with the "routeList" command to get a list of routes
         with predictions for a given transit agency.
 
@@ -133,14 +156,13 @@ class NextBusClient():
 
         agency = self._get_agency(agency)
 
-        params = {
-            'command': 'routeList',
-            'a': agency
-        }
+        params = {"command": "routeList", "a": agency}
 
         return self._perform_request(params=params)
 
-    def get_route_config(self, route_tag=None, agency=None):
+    def get_route_config(
+        self, route_tag: str | None = None, agency: str | None = None
+    ) -> dict[str, Any] | str:
         """Make a request to the NextBus API with the "routeConfig" command to get the details of a
         single route, including all stops, and latitude and longitude of the route's path.
 
@@ -163,17 +185,16 @@ class NextBusClient():
 
         agency = self._get_agency(agency)
 
-        params = {
-            'command': 'routeConfig',
-            'a': agency
-        }
+        params = {"command": "routeConfig", "a": agency}
 
         if route_tag is not None:
-            params['r'] = route_tag
+            params["r"] = route_tag
 
         return self._perform_request(params=params)
 
-    def get_predictions(self, stop_tag, route_tag, agency=None):
+    def get_predictions(
+        self, stop_tag: str | int, route_tag: str, agency: str | None = None
+    ) -> dict[str, Any] | str:
         """Make a request to the NextBus API with the "predictions" command to get arrival time
         predictions for a single stop. A route tag can optionally be provided to filter the
         predictions down to only that particular route at the stop.
@@ -198,23 +219,23 @@ class NextBusClient():
         agency = self._get_agency(agency)
 
         params = {
-            'command': 'predictions',
-            'a': agency,
-            's': stop_tag,
-            'r': route_tag,
+            "command": "predictions",
+            "a": agency,
+            "s": stop_tag,
+            "r": route_tag,
         }
 
         return self._perform_request(params=params)
 
-    def get_predictions_for_multi_stops(self, stops, agency=None):
+    def get_predictions_for_multi_stops(
+        self, route_stops: Iterable[RouteStop], agency: str | None = None
+    ) -> dict[str, Any] | str:
         """Make a request to the NextBus API with the "predictionsForMultiStops" command to get
         arrival time predictions for multiple stops.
 
         Arguments:
-            stops: (List or tuple) List or tuple of dictionaries identifying the combinations of
-                routes and stops to get predictions for. Each dictionary must contain the keys
-                "stop_tag" and "route_tag", indicating each stop to get predictions for, and the
-                route to get predictions for at that stop, respectively.
+            route_stops: (Sequence of RouteStops) Sequence of tuples identifying the combinations of
+                routes and stops to get predictions for.
             agency: (String) Name of a transit agency on NextBus. This must be provided if the
                 "agency" instance attribute has not been set.
 
@@ -229,30 +250,22 @@ class NextBusClient():
                 valid JSON.
         """
 
-        if not isinstance(stops, list) and not isinstance(stops, tuple):
-            raise TypeError('"stops" must be a list or a tuple.')
-
-        for stop in stops:
-            if not isinstance(stop, dict) or 'route_tag' not in stop or 'stop_tag' not in stop:
-                raise ValueError('"stops" must contain dictionaries with the "route_tag" and '
-                                 '"stop_tag" keys')
+        if not isinstance(route_stops, Sequence) or isinstance(route_stops, str):
+            raise TypeError('"route_stops" must be a sequence.')
 
         agency = self._get_agency(agency)
 
         params = {
-            'command': 'predictionsForMultiStops',
+            "command": "predictionsForMultiStops",
             # Hacky way of repeating the "stops" key in the query string for each route
-            'stops': '&stops='.join([
-                '{}|{}'.format(
-                    stop['route_tag'],
-                    stop['stop_tag'],
-                ) for stop in stops
-            ]),
-            'a': agency
+            "stops": "&stops=".join(str(route_stop) for route_stop in route_stops),
+            "a": agency,
         }
         return self._perform_request(params=params)
 
-    def get_schedule(self, route_tag, agency=None):
+    def get_schedule(
+        self, route_tag: str, agency: str | None = None
+    ) -> dict[str, Any] | str:
         """Make a request to the NextBus API with the "schedule" command to get the schedule for a
         single route.
 
@@ -274,24 +287,22 @@ class NextBusClient():
 
         agency = self._get_agency(agency)
 
-        params = {
-            'command': 'schedule',
-            'a': agency,
-            'r': route_tag
-        }
+        params = {"command": "schedule", "a": agency, "r": route_tag}
 
         return self._perform_request(params=params)
 
-    def get_vehicle_locations(self, route_tag, timestamp, agency=None):
+    def get_vehicle_locations(
+        self, route_tag: str, since_time: datetime, agency: str | None = None
+    ) -> dict[str, Any] | str:
         """Make a request to the NextBus API with the "vehicleLocations" command to get the all of
         the vehicles on a route with locations that have changed since a given time.
 
         Arguments:
             route_tag: (String) The NextBus route tag for a route.
-            timestamp: (Integer) Unix timestamp in milliseconds indicating that only vehicles with
+            since_time: (Datetime) Python datetime that only vehicles with
                 locations that have changed since this time will be returned.
-            agency: (String) Name of a transit agency on NextBus. This must be provided if the
-                "agency" instance attribute has not been set.
+            agency: (String) Optional name of a transit agency on NextBus. This must be provided if
+                the "agency" instance attribute has not been set.
 
         Returns:
             If the output_format is "json": Dictionary containing the JSON returned by the request.
@@ -307,15 +318,15 @@ class NextBusClient():
         agency = self._get_agency(agency)
 
         params = {
-            'command': 'vehicleLocations',
-            'a': agency,
-            'r': route_tag,
-            't': timestamp
+            "command": "vehicleLocations",
+            "a": agency,
+            "r": route_tag,
+            "t": since_time.timestamp() * 1000,
         }
 
         return self._perform_request(params=params)
 
-    def _get_agency(self, agency):
+    def _get_agency(self, agency: str | None) -> str:
         """Get the agency name from either the provided argument or "agency" instance attribute.
 
         Args:
@@ -330,15 +341,13 @@ class NextBusClient():
                 atrribute are None.
         """
 
+        agency = agency or self.agency
         if agency is None:
-            if self.agency is None:
-                raise ValueError('"agency" is required.')
-            else:
-                return self.agency
-        else:
-            return agency
+            raise ValueError('"agency" is required.')
 
-    def _perform_request(self, params):
+        return agency
+
+    def _perform_request(self, params: dict[str, Any]) -> dict[str, Any] | str:
         """Make a request to the NextBus API with given parameters.
 
         Arguments:
@@ -355,32 +364,34 @@ class NextBusClient():
                 valid JSON.
         """
 
-        if self.output_format == 'json':
+        if self.output_format == ReturnFormat.JSON:
             base_url = NEXTBUS_JSON_FEED_URL
-        elif self.output_format == 'xml':
+        elif self.output_format == ReturnFormat.XML:
             base_url = NEXTBUS_XML_FEED_URL
         else:
-            raise ValueError('Invalid output_format: %s' % self.output_format)
+            raise ValueError("Invalid output_format: %s" % self.output_format)
 
-        url = '%s?%s' % (base_url, urllib.parse.urlencode(params, safe='&='))
+        url = f"{base_url}?{urlencode(params, safe='&=')}"
 
         headers = {}
 
         if self.use_compression:
-            headers['Accept-Encoding'] = 'gzip, deflate'
+            headers["Accept-Encoding"] = "gzip, deflate"
 
-        request = urllib.request.Request(url=url,
-                                         headers=headers,
-                                         method='GET')
+        request = urllib.request.Request(
+            url=url,
+            headers=headers,
+            method="GET",
+        )
 
         try:
-            LOG.debug('Making request to URL %s', url)
+            LOG.debug("Making request to URL %s", url)
             with urllib.request.urlopen(request) as response:
                 response_text = response.read()
 
-                if self.output_format == JSON_FORMAT:
+                if self.output_format == ReturnFormat.JSON:
                     response = json.loads(response_text)
-                elif self.output_format == XML_FORMAT:
+                elif self.output_format == ReturnFormat.XML:
                     response = response_text
                 else:
                     raise NextBusFormatError(f"Unexpected format: {self.output_format}")
