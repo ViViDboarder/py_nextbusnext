@@ -374,7 +374,7 @@ class NextBusClient():
                                          method='GET')
 
         try:
-            LOG.info('Making request to URL %s', url)
+            LOG.debug('Making request to URL %s', url)
             with urllib.request.urlopen(request) as response:
                 response_text = response.read()
 
