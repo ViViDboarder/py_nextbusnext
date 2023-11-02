@@ -250,7 +250,7 @@ class NextBusClient:
         """
 
         if not isinstance(route_stops, Iterable) or isinstance(route_stops, str):
-            raise TypeError('"route_stops" must be a sequence.')
+            raise TypeError('"route_stops" must be iterable.')
 
         agency = self._get_agency(agency)
 
