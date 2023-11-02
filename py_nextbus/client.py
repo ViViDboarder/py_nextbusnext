@@ -4,7 +4,6 @@ import json
 import logging
 import urllib.request
 from collections.abc import Iterable
-from collections.abc import Sequence
 from datetime import datetime
 from enum import Enum
 from typing import Any
@@ -105,7 +104,7 @@ class NextBusClient:
         messages to display for multiple routes.
 
         Arguments:
-            route_tags: (Sequence of Strings) List of NextBus route tags for the routes to get
+            route_tags: (Iterable of Strings) List of NextBus route tags for the routes to get
                 messages for.
             agency: (String) Name of a transit agency on NextBus. This must be provided if the
                 "agency" instance attribute has not been set.
@@ -122,7 +121,7 @@ class NextBusClient:
         """
 
         if not isinstance(route_tags, Iterable) or isinstance(route_tags, str):
-            raise TypeError('"route_tags" must be a Sequence but not a single string.')
+            raise TypeError('"route_tags" must be a Iterable but not a single string.')
 
         agency = self._get_agency(agency)
 
@@ -234,7 +233,7 @@ class NextBusClient:
         arrival time predictions for multiple stops.
 
         Arguments:
-            route_stops: (Sequence of RouteStops) Sequence of tuples identifying the combinations of
+            route_stops: (Iterable of RouteStops) Iterable of tuples identifying the combinations of
                 routes and stops to get predictions for.
             agency: (String) Name of a transit agency on NextBus. This must be provided if the
                 "agency" instance attribute has not been set.
@@ -250,7 +249,7 @@ class NextBusClient:
                 valid JSON.
         """
 
-        if not isinstance(route_stops, Sequence) or isinstance(route_stops, str):
+        if not isinstance(route_stops, Iterable) or isinstance(route_stops, str):
             raise TypeError('"route_stops" must be a sequence.')
 
         agency = self._get_agency(agency)

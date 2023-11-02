@@ -124,6 +124,7 @@ class TestGetMessages(unittest.TestCase):
 
         nextbus_client = client.NextBusClient(output_format=client.ReturnFormat.JSON)
         nextbus_client.get_messages(route_tags=["foo"], agency="bar")
+        nextbus_client.get_messages(route_tags={"foo"}, agency="bar")
         nextbus_client.get_messages(route_tags=("foo",), agency="bar")
         nextbus_client.get_messages(route_tags=(f for f in ("foo",)), agency="bar")
 
@@ -255,12 +256,6 @@ class TestGetPredictionsForMultiStops(unittest.TestCase):
         nor a tuple."""
 
         nextbus_client = client.NextBusClient(output_format=client.ReturnFormat.JSON)
-
-        with self.assertRaises(TypeError):
-            nextbus_client.get_predictions_for_multi_stops(route_stops={})
-
-        with self.assertRaises(TypeError):
-            nextbus_client.get_predictions_for_multi_stops(route_stops=set())
 
         with self.assertRaises(TypeError):
             nextbus_client.get_predictions_for_multi_stops(route_stops=None)
