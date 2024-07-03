@@ -58,7 +58,7 @@ class NextBusClient:
         agency_id: str | None = None,
     ) -> None:
         self.agency_id = agency_id
-        self.api_key: str | None = self._fetch_api_key()
+        self.api_key: str | None = None
         self.headers = {
             "Accept": "application/json, text/javascript, */*; q=0.01",
             "Referer": self.referer,
