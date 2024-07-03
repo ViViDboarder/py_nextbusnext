@@ -130,9 +130,9 @@ class NextBusClient:
         params["timestamp"] = int(time() * 1000)
 
         try:
-            response = requests.get(
-                f"{self.base_url}/{endpoint}", params=params, headers=self.headers
-            )
+            url = f"{self.base_url}/{endpoint}"
+            LOG.debug("GET %s", url)
+            response = requests.get(url, params=params, headers=self.headers)
             response.raise_for_status()
             return response.json()
         except HTTPError as exc:

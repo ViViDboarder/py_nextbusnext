@@ -6,7 +6,7 @@ with open("README.md", "r") as readme:
 
 setup(
     name="py_nextbusnext",
-    version="2.0.1",
+    version="2.0.2",
     author="ViViDboarder",
     description="Minimalistic Python client for the NextBus public API for real-time transit "
     "arrival data",
