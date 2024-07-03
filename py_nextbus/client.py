@@ -92,7 +92,7 @@ class NextBusClient:
         route_id: str,
         direction_id: str | None = None,
         agency_id: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> list[dict[str, Any]]:
         agency_id = agency_id or self.agency_id
         if not agency_id:
             raise NextBusValidationError("Agency ID is required")
@@ -105,7 +105,8 @@ class NextBusClient:
             f"agencies/{agency_id}/routes/{route_id}/stops/{stop_id}/predictions",
             params,
         )
-        return cast(dict[str, Any], result)
+
+        return cast(list[dict[str, Any]], result)
 
     def _fetch_api_key(self) -> str:
         response = requests.get(self.referer)
