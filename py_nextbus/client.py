@@ -89,7 +89,7 @@ class NextBusClient:
     def predictions_for_stop(
         self,
         stop_id: str | int,
-        route_id: str,
+        route_id: str | None = None,
         direction_id: str | None = None,
         agency_id: str | None = None,
     ) -> list[dict[str, Any]]:
@@ -101,8 +101,12 @@ class NextBusClient:
         if direction_id:
             params["direction"] = direction_id
 
+        route_component = ""
+        if route_id:
+            route_component = f"routes/{route_id}/"
+
         result = self._get(
-            f"agencies/{agency_id}/routes/{route_id}/stops/{stop_id}/predictions",
+            f"agencies/{agency_id}/{route_component}stops/{stop_id}/predictions",
             params,
         )
 
