@@ -89,10 +89,9 @@ class NextBusClient:
     def predictions_for_stop(
         self,
         stop_id: str | int,
-        route_id: str,
+        route_id: str | None = None,
         direction_id: str | None = None,
         agency_id: str | None = None,
-        unfiltered: bool = False,
     ) -> list[dict[str, Any]]:
         agency_id = agency_id or self.agency_id
         if not agency_id:
@@ -100,17 +99,23 @@ class NextBusClient:
 
         params: dict[str, Any] = {"coincident": True}
         if direction_id:
+            if not route_id:
+                raise NextBusValidationError("Direction ID provided without route ID")
             params["direction"] = direction_id
 
+        route_component = ""
+        if route_id:
+            route_component = f"routes/{route_id}/"
+
         result = self._get(
-            f"agencies/{agency_id}/routes/{route_id}/stops/{stop_id}/predictions",
+            f"agencies/{agency_id}/{route_component}stops/{stop_id}/predictions",
             params,
         )
 
         predictions = cast(list[dict[str, Any]], result)
 
-        # If unfiltered, return all predictions as the API returned them
-        if unfiltered:
+        # If route not provided, return all predictions as the API returned them
+        if not route_id:
             return predictions
 
         # HACK: Filter predictions based on stop and route because the API seems to ignore the route
@@ -124,7 +129,7 @@ class NextBusClient:
         ]
 
         # HACK: Filter predictions based on direction in case the API returns extra predictions
-        if direction_id is not None:
+        if direction_id:
             for prediction_result in predictions:
                 prediction_result["values"] = [
                     prediction
