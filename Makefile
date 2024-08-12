@@ -31,7 +31,7 @@ build-env: $(ENV)/bin/twine $(ENV)/bin/wheel
 # Runs tests
 .PHONY: test
 test: $(ENV) $(ENV)/bin/pre-commit
-	# $(ENV)/bin/tox
+	$(ENV)/bin/tox
 	$(ENV)/bin/pre-commit run --all-files
 
 # Builds wheel for package to upload

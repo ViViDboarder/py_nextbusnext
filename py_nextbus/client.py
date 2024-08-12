@@ -92,6 +92,7 @@ class NextBusClient:
         route_id: str,
         direction_id: str | None = None,
         agency_id: str | None = None,
+        unfiltered: bool = False,
     ) -> list[dict[str, Any]]:
         agency_id = agency_id or self.agency_id
         if not agency_id:
@@ -106,7 +107,32 @@ class NextBusClient:
             params,
         )
 
-        return cast(list[dict[str, Any]], result)
+        predictions = cast(list[dict[str, Any]], result)
+
+        # If unfiltered, return all predictions as the API returned them
+        if unfiltered:
+            return predictions
+
+        # HACK: Filter predictions based on stop and route because the API seems to ignore the route
+        predictions = [
+            prediction_result
+            for prediction_result in predictions
+            if (
+                prediction_result["stop"]["id"] == stop_id
+                and prediction_result["route"]["id"] == route_id
+            )
+        ]
+
+        # HACK: Filter predictions based on direction in case the API returns extra predictions
+        if direction_id is not None:
+            for prediction_result in predictions:
+                prediction_result["values"] = [
+                    prediction
+                    for prediction in prediction_result["values"]
+                    if prediction["direction"]["id"] == direction_id
+                ]
+
+        return predictions
 
     def _fetch_api_key(self) -> str:
         response = requests.get(self.referer)
