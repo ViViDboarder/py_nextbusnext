@@ -10,11 +10,11 @@ $(ENV):
 
 # Install wheel for building packages
 $(ENV)/bin/wheel: $(ENV)
-	$(ENV)/bin/pip install wheel
+	$(ENV)/bin/pip install wheel setuptools
 
 # Install twine for uploading packages
 $(ENV)/bin/twine: $(ENV)
-	$(ENV)/bin/pip install twine
+	$(ENV)/bin/pip install twine setuptools
 
 # Install pre-commit and other devenv items
 $(ENV)/bin/pre-commit: $(ENV)
