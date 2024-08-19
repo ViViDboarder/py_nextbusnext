@@ -21,12 +21,11 @@ class TestNextBusClient(unittest.TestCase):
         mock_get.return_value = MOCK_PREDICTIONS_RESPONSE_NO_ROUTE
 
         result = self.client.predictions_for_stop(
-            TEST_STOP_ID,
-            agency_id=TEST_AGENCY_ID
+            TEST_STOP_ID, agency_id=TEST_AGENCY_ID
         )
 
         self.assertEqual({r["stop"]["id"] for r in result}, {TEST_STOP_ID})
-        self.assertEqual(len(result), 3) # Results include all routes
+        self.assertEqual(len(result), 3)  # Results include all routes
 
         mock_get.assert_called_once()
         mock_get.assert_called_with(

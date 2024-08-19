@@ -106,139 +106,139 @@ MOCK_ROUTE_DETAILS_RESPONSE = {
 }
 
 MOCK_PREDICTIONS_RESPONSE_NO_ROUTE = [
-  {
-    "serverTimestamp": 1724038210798,
-    "nxbs2RedirectUrl": "",
-    "route": {
-      "id": "LOWL",
-      "title": "Lowl Owl Taraval",
-      "description": "10pm-5am nightly",
-      "color": "666666",
-      "textColor": "ffffff",
-      "hidden": False
-    },
-    "stop": {
-      "id": "5184",
-      "lat": 37.8071299,
-      "lon": -122.41732,
-      "name": "Jones St & Beach St",
-      "code": "15184",
-      "hidden": False,
-      "showDestinationSelector": True,
-      "route": "LOWL"
-    },
-    "values": []
-  },
-  {
-    "serverTimestamp": 1724038210798,
-    "nxbs2RedirectUrl": "",
-    "route": {
-      "id": "FBUS",
-      "title": "Fbus Market & Wharves",
-      "description": "",
-      "color": "b49a36",
-      "textColor": "000000",
-      "hidden": False
-    },
-    "stop": {
-      "id": "5184",
-      "lat": 37.8071299,
-      "lon": -122.41732,
-      "name": "Jones St & Beach St",
-      "code": "15184",
-      "hidden": False,
-      "showDestinationSelector": True,
-      "route": "FBUS"
-    },
-    "values": []
-  },
-  {
-    "serverTimestamp": 1724038210798,
-    "nxbs2RedirectUrl": "",
-    "route": {
-      "id": "F",
-      "title": "F Market & Wharves",
-      "description": "7am-10pm daily",
-      "color": "b49a36",
-      "textColor": "000000",
-      "hidden": False
-    },
-    "stop": {
-      "id": "5184",
-      "lat": 37.8071299,
-      "lon": -122.41732,
-      "name": "Jones St & Beach St",
-      "code": "15184",
-      "hidden": False,
-      "showDestinationSelector": True,
-      "route": "F"
-    },
-    "values": [
-      {
-        "timestamp": 1724038309178,
-        "minutes": 1,
-        "affectedByLayover": True,
-        "isDeparture": True,
-        "occupancyStatus": -1,
-        "occupancyDescription": "Unknown",
-        "vehiclesInConsist": 1,
-        "linkedVehicleIds": "1078",
-        "vehicleId": "1078",
-        "vehicleType": "Historic Street Car_VC1",
-        "direction": {
-          "id": "F_0_var1",
-          "name": "Castro + Market",
-          "destinationName": "Castro + Market"
+    {
+        "serverTimestamp": 1724038210798,
+        "nxbs2RedirectUrl": "",
+        "route": {
+            "id": "LOWL",
+            "title": "Lowl Owl Taraval",
+            "description": "10pm-5am nightly",
+            "color": "666666",
+            "textColor": "ffffff",
+            "hidden": False,
         },
-        "tripId": "11593249_M13",
-        "delay": 0,
-        "predUsingNavigationTm": False,
-        "departure": True
-      },
-      {
-        "timestamp": 1724039160000,
-        "minutes": 15,
-        "affectedByLayover": True,
-        "isDeparture": True,
-        "occupancyStatus": -1,
-        "occupancyDescription": "Unknown",
-        "vehiclesInConsist": 1,
-        "linkedVehicleIds": "1080",
-        "vehicleId": "1080",
-        "vehicleType": "Historic Street Car_VC1",
-        "direction": {
-          "id": "F_0_var0",
-          "name": "Castro",
-          "destinationName": "Castro"
+        "stop": {
+            "id": "5184",
+            "lat": 37.8071299,
+            "lon": -122.41732,
+            "name": "Jones St & Beach St",
+            "code": "15184",
+            "hidden": False,
+            "showDestinationSelector": True,
+            "route": "LOWL",
         },
-        "tripId": "11593252_M13",
-        "delay": 0,
-        "predUsingNavigationTm": False,
-        "departure": True
-      },
-      {
-        "timestamp": 1724041320000,
-        "minutes": 51,
-        "affectedByLayover": True,
-        "isDeparture": True,
-        "occupancyStatus": -1,
-        "occupancyDescription": "Unknown",
-        "vehiclesInConsist": 1,
-        "linkedVehicleIds": "1056",
-        "vehicleId": "1056",
-        "vehicleType": "Historic Street Car_VC1",
-        "direction": {
-          "id": "F_0_var1",
-          "name": "Castro + Market",
-          "destinationName": "Castro + Market"
+        "values": [],
+    },
+    {
+        "serverTimestamp": 1724038210798,
+        "nxbs2RedirectUrl": "",
+        "route": {
+            "id": "FBUS",
+            "title": "Fbus Market & Wharves",
+            "description": "",
+            "color": "b49a36",
+            "textColor": "000000",
+            "hidden": False,
         },
-        "tripId": "11593256_M13",
-        "delay": 0,
-        "predUsingNavigationTm": False,
-        "departure": True
-      }
-    ]
-  }
+        "stop": {
+            "id": "5184",
+            "lat": 37.8071299,
+            "lon": -122.41732,
+            "name": "Jones St & Beach St",
+            "code": "15184",
+            "hidden": False,
+            "showDestinationSelector": True,
+            "route": "FBUS",
+        },
+        "values": [],
+    },
+    {
+        "serverTimestamp": 1724038210798,
+        "nxbs2RedirectUrl": "",
+        "route": {
+            "id": "F",
+            "title": "F Market & Wharves",
+            "description": "7am-10pm daily",
+            "color": "b49a36",
+            "textColor": "000000",
+            "hidden": False,
+        },
+        "stop": {
+            "id": "5184",
+            "lat": 37.8071299,
+            "lon": -122.41732,
+            "name": "Jones St & Beach St",
+            "code": "15184",
+            "hidden": False,
+            "showDestinationSelector": True,
+            "route": "F",
+        },
+        "values": [
+            {
+                "timestamp": 1724038309178,
+                "minutes": 1,
+                "affectedByLayover": True,
+                "isDeparture": True,
+                "occupancyStatus": -1,
+                "occupancyDescription": "Unknown",
+                "vehiclesInConsist": 1,
+                "linkedVehicleIds": "1078",
+                "vehicleId": "1078",
+                "vehicleType": "Historic Street Car_VC1",
+                "direction": {
+                    "id": "F_0_var1",
+                    "name": "Castro + Market",
+                    "destinationName": "Castro + Market",
+                },
+                "tripId": "11593249_M13",
+                "delay": 0,
+                "predUsingNavigationTm": False,
+                "departure": True,
+            },
+            {
+                "timestamp": 1724039160000,
+                "minutes": 15,
+                "affectedByLayover": True,
+                "isDeparture": True,
+                "occupancyStatus": -1,
+                "occupancyDescription": "Unknown",
+                "vehiclesInConsist": 1,
+                "linkedVehicleIds": "1080",
+                "vehicleId": "1080",
+                "vehicleType": "Historic Street Car_VC1",
+                "direction": {
+                    "id": "F_0_var0",
+                    "name": "Castro",
+                    "destinationName": "Castro",
+                },
+                "tripId": "11593252_M13",
+                "delay": 0,
+                "predUsingNavigationTm": False,
+                "departure": True,
+            },
+            {
+                "timestamp": 1724041320000,
+                "minutes": 51,
+                "affectedByLayover": True,
+                "isDeparture": True,
+                "occupancyStatus": -1,
+                "occupancyDescription": "Unknown",
+                "vehiclesInConsist": 1,
+                "linkedVehicleIds": "1056",
+                "vehicleId": "1056",
+                "vehicleType": "Historic Street Car_VC1",
+                "direction": {
+                    "id": "F_0_var1",
+                    "name": "Castro + Market",
+                    "destinationName": "Castro + Market",
+                },
+                "tripId": "11593256_M13",
+                "delay": 0,
+                "predUsingNavigationTm": False,
+                "departure": True,
+            },
+        ],
+    },
 ]
 
 MOCK_PREDICTIONS_RESPONSE_WITH_ROUTE = [
