@@ -99,6 +99,8 @@ class NextBusClient:
 
         params: dict[str, Any] = {"coincident": True}
         if direction_id:
+            if not route_id:
+                raise NextBusValidationError("Direction ID provided without route ID")
             params["direction"] = direction_id
 
         route_component = ""
@@ -127,7 +129,7 @@ class NextBusClient:
         ]
 
         # HACK: Filter predictions based on direction in case the API returns extra predictions
-        if direction_id is not None:
+        if direction_id:
             for prediction_result in predictions:
                 prediction_result["values"] = [
                     prediction
