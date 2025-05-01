@@ -12,7 +12,6 @@ import requests
 from requests.exceptions import HTTPError
 
 LOG = logging.getLogger()
-API_KEY_RE = re.compile(r"api_key.*key=([a-z0-9]+)")
 
 
 class NextBusError(Exception):
@@ -22,7 +21,7 @@ class NextBusError(Exception):
 class NextBusHTTPError(HTTPError, NextBusError):
     def __init__(self, message: str, http_err: HTTPError):
         self.__dict__.update(http_err.__dict__)
-        self.message = message
+        self.message: str = message
 
 
 class NextBusValidationError(ValueError, NextBusError):
@@ -50,18 +49,15 @@ class RouteStop(NamedTuple):
 
 
 class NextBusClient:
-    referer = "https://retro.umoiq.com/"
-    base_url = "https://retro.umoiq.com/api/pub/v1"
+    base_url: str = "https://api.prd-1.iq.live.umoiq.com/v2.0/riders"
 
     def __init__(
         self,
         agency_id: str | None = None,
     ) -> None:
-        self.agency_id = agency_id
-        self.api_key: str | None = None
-        self.headers = {
+        self.agency_id: str | None = agency_id
+        self.headers: dict[str, str] = {
             "Accept": "application/json, text/javascript, */*; q=0.01",
-            "Referer": self.referer,
         }
 
     def agencies(self) -> list[dict[str, Any]]:
@@ -93,24 +89,21 @@ class NextBusClient:
         direction_id: str | None = None,
         agency_id: str | None = None,
     ) -> list[dict[str, Any]]:
+        """Returns predictions for a stop."""
         agency_id = agency_id or self.agency_id
         if not agency_id:
             raise NextBusValidationError("Agency ID is required")
 
-        params: dict[str, Any] = {"coincident": True}
         if direction_id:
             if not route_id:
                 raise NextBusValidationError("Direction ID provided without route ID")
-            params["direction"] = direction_id
 
-        route_component = ""
         if route_id:
-            route_component = f"routes/{route_id}/"
-
-        result = self._get(
-            f"agencies/{agency_id}/{route_component}stops/{stop_id}/predictions",
-            params,
-        )
+            result = self._get(
+                f"agencies/{agency_id}/nstops/{route_id}:{stop_id}/predictions"
+            )
+        else:
+            result = self._get(f"agencies/{agency_id}/stops/{stop_id}/predictions")
 
         predictions = cast(list[dict[str, Any]], result)
 
@@ -139,27 +132,11 @@ class NextBusClient:
 
         return predictions
 
-    def _fetch_api_key(self) -> str:
-        response = requests.get(self.referer)
-        response.raise_for_status()
-
-        key_search = API_KEY_RE.search(response.text)
-        if not key_search:
-            raise NextBusValidationError("Could not find API key on page")
-
-        api_key = key_search.group(1)
-
-        return api_key
-
     def _get(
         self, endpoint: str, params: dict[str, Any] | None = None
     ) -> dict[str, Any] | list[dict[str, Any]]:
         if params is None:
             params = {}
-        if not self.api_key:
-            self.api_key = self._fetch_api_key()
-        params["key"] = self.api_key
-        params["timestamp"] = int(time() * 1000)
 
         try:
             url = f"{self.base_url}/{endpoint}"
@@ -168,9 +145,6 @@ class NextBusClient:
             response.raise_for_status()
             return response.json()
         except HTTPError as exc:
-            if exc.response.status_code == 401:
-                self.api_key = None
-
             raise NextBusHTTPError("Error from the NextBus API", exc) from exc
         except json.decoder.JSONDecodeError as exc:
             raise NextBusFormatError("Failed to parse JSON from request") from exc

@@ -28,11 +28,16 @@ devenv: $(ENV)/bin/pre-commit
 .PHONY: build-env
 build-env: $(ENV)/bin/twine $(ENV)/bin/wheel
 
-# Runs tests
+# Runs unit tests
 .PHONY: test
 test: $(ENV) $(ENV)/bin/pre-commit
 	$(ENV)/bin/tox
 	$(ENV)/bin/pre-commit run --all-files
+
+# Runs acceptance tests
+.PHONY: acceptance
+acceptance: $(ENV)
+	$(ENV)/bin/tox -e acceptance
 
 # Builds wheel for package to upload
 .PHONY: build

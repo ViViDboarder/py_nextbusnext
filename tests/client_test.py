@@ -30,7 +30,6 @@ class TestNextBusClient(unittest.TestCase):
         mock_get.assert_called_once()
         mock_get.assert_called_with(
             f"agencies/{TEST_AGENCY_ID}/stops/{TEST_STOP_ID}/predictions",
-            {"coincident": True},
         )
 
     @unittest.mock.patch("py_nextbus.client.NextBusClient._get")
@@ -54,8 +53,7 @@ class TestNextBusClient(unittest.TestCase):
 
         mock_get.assert_called_once()
         mock_get.assert_called_with(
-            f"agencies/{TEST_AGENCY_ID}/routes/{TEST_ROUTE_ID}/stops/{TEST_STOP_ID}/predictions",
-            {"coincident": True, "direction": TEST_DIRECTION_ID},
+            f"agencies/{TEST_AGENCY_ID}/nstops/{TEST_ROUTE_ID}:{TEST_STOP_ID}/predictions",
         )
 
 
