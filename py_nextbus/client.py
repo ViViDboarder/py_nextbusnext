@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from datetime import datetime
 from time import time
 from typing import Any
 from typing import cast
@@ -59,6 +60,33 @@ class NextBusClient:
         self.headers: dict[str, str] = {
             "Accept": "application/json, text/javascript, */*; q=0.01",
         }
+
+        self._rate_limit: int = 0
+        self._rate_limit_remaining: int = 0
+        self._rate_limit_reset: datetime | None = None
+
+    @property
+    def rate_limit(self) -> int:
+        """Returns the rate limit for the API."""
+        return self._rate_limit
+
+    @property
+    def rate_limit_remaining(self) -> int:
+        """Returns the remaining rate limit for the API."""
+        return self._rate_limit_remaining
+
+    @property
+    def rate_limit_reset(self) -> datetime | None:
+        """Returns the time when the rate limit will reset."""
+        return self._rate_limit_reset
+
+    @property
+    def rate_limit_percent(self) -> float:
+        """Returns the percentage of the rate limit remaining."""
+        if self.rate_limit == 0:
+            return 0.0
+
+        return self.rate_limit_remaining / self.rate_limit * 100
 
     def agencies(self) -> list[dict[str, Any]]:
         result = self._get("agencies")
@@ -143,6 +171,17 @@ class NextBusClient:
             LOG.debug("GET %s", url)
             response = requests.get(url, params=params, headers=self.headers)
             response.raise_for_status()
+
+            # Track rate limit information
+            self._rate_limit = int(response.headers.get("X-RateLimit-Limit", 0))
+            self._rate_limit_remaining = int(
+                response.headers.get("X-RateLimit-Remaining", 0)
+            )
+            reset_time = response.headers.get("X-RateLimit-Reset")
+            self._rate_limit_reset = (
+                datetime.fromtimestamp(int(reset_time)) if reset_time else None
+            )
+
             return response.json()
         except HTTPError as exc:
             raise NextBusHTTPError("Error from the NextBus API", exc) from exc

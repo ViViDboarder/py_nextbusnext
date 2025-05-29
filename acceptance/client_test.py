@@ -25,6 +25,10 @@ class ClientTest(unittest.TestCase):
         # Check test agency name
         self.assertIn(TEST_AGENCY, [agency["id"] for agency in agencies])
 
+        self.assertGreater(self.client.rate_limit, 0)
+        self.assertGreater(self.client.rate_limit_remaining, 0)
+        self.assertGreater(self.client.rate_limit_percent, 0)
+
     def test_list_routes(self):
         routes = self.client.routes(TEST_AGENCY)
 
