@@ -57,9 +57,25 @@ class NextBusClient:
         agency_id: str | None = None,
     ) -> None:
         self.agency_id: str | None = agency_id
-        self.headers: dict[str, str] = {
-            "Accept": "application/json, text/javascript, */*; q=0.01",
-        }
+
+        self._session: requests.Session = requests.Session()
+        self._session.headers.update(
+            {
+                "User-Agent": "PyNextBus",
+                "Accept": "application/json",
+                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Encoding": "gzip, deflate, br, zstd",
+                "Compress": "true",
+                "DNT": "1",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Connection": "keep-alive",
+                # Additional headers used in browser
+                # "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0",
+                # "Referer": "https://rider.umoiq.com/",
+                # "Origin": "https://rider.umoiq.com",
+            }
+        )
 
         self._rate_limit: int = 0
         self._rate_limit_remaining: int = 0
@@ -169,7 +185,7 @@ class NextBusClient:
         try:
             url = f"{self.base_url}/{endpoint}"
             LOG.debug("GET %s", url)
-            response = requests.get(url, params=params, headers=self.headers)
+            response = self._session.get(url, params=params)
             response.raise_for_status()
 
             # Track rate limit information
@@ -183,6 +199,7 @@ class NextBusClient:
             )
 
             return response.json()
+
         except HTTPError as exc:
             raise NextBusHTTPError("Error from the NextBus API", exc) from exc
         except json.decoder.JSONDecodeError as exc:
