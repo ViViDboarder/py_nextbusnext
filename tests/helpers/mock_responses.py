@@ -1,9 +1,14 @@
+from py_nextbus.models import AgencyInfo
+from py_nextbus.models import RouteDetails
+from py_nextbus.models import RouteInfo
+from py_nextbus.models import StopPrediction
+
 TEST_AGENCY_ID = "sfmta-cis"
 TEST_ROUTE_ID = "F"
 TEST_STOP_ID = "5184"
 TEST_DIRECTION_ID = "F_0_var0"
 
-MOCK_AGENCY_LIST_RESPONSE = [
+MOCK_AGENCY_LIST_RESPONSE: list[AgencyInfo] = [
     {
         "id": "sfmta-cis",
         "name": "San Francisco Muni CIS",
@@ -15,7 +20,7 @@ MOCK_AGENCY_LIST_RESPONSE = [
     },
 ]
 
-MOCK_ROUTE_LIST_RESPONSE = [
+MOCK_ROUTE_LIST_RESPONSE: list[RouteInfo] = [
     {
         "id": "F",
         "rev": 1057,
@@ -28,7 +33,7 @@ MOCK_ROUTE_LIST_RESPONSE = [
     },
 ]
 
-MOCK_ROUTE_DETAILS_RESPONSE = {
+MOCK_ROUTE_DETAILS_RESPONSE: RouteDetails = {
     "id": "F",
     "rev": 1057,
     "title": "F Market & Wharves",
@@ -105,7 +110,7 @@ MOCK_ROUTE_DETAILS_RESPONSE = {
     "timestamp": "2024-06-23T03:06:58Z",
 }
 
-MOCK_PREDICTIONS_RESPONSE_NO_ROUTE = [
+MOCK_PREDICTIONS_RESPONSE_NO_ROUTE: list[StopPrediction] = [
     {
         "serverTimestamp": 1724038210798,
         "nxbs2RedirectUrl": "",
@@ -241,7 +246,7 @@ MOCK_PREDICTIONS_RESPONSE_NO_ROUTE = [
     },
 ]
 
-MOCK_PREDICTIONS_RESPONSE_WITH_ROUTE = [
+MOCK_PREDICTIONS_RESPONSE_WITH_ROUTE: list[StopPrediction] = [
     {
         "serverTimestamp": 1720034290432,
         "nxbs2RedirectUrl": "",
