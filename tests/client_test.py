@@ -12,7 +12,6 @@ from tests.helpers.mock_responses import TEST_STOP_ID
 
 
 class TestNextBusClient(unittest.TestCase):
-
     def setUp(self):
         self.client = NextBusClient()
 

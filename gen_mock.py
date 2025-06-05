@@ -3,7 +3,6 @@ from tests.mock_responses import TEST_AGENCY_ID
 from tests.mock_responses import TEST_ROUTE_ID
 from tests.mock_responses import TEST_STOP_ID
 
-
 client = NextBusClient()
 agencies = client.agencies()
 print("Agencies:")

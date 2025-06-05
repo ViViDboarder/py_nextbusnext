@@ -2,7 +2,6 @@ import unittest
 
 from py_nextbus import NextBusClient
 
-
 TEST_AGENCY = "sfmta-cis"
 TEST_ROUTE = "F"
 TEST_STOP = "4513"
