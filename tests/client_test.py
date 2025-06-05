@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import unittest.mock
+from unittest.mock import MagicMock
 
 from py_nextbus.client import NextBusClient
 from tests.helpers.mock_responses import MOCK_PREDICTIONS_RESPONSE_NO_ROUTE
@@ -16,7 +17,7 @@ class TestNextBusClient(unittest.TestCase):
         self.client = NextBusClient()
 
     @unittest.mock.patch("py_nextbus.client.NextBusClient._get")
-    def test_predictions_for_stop_no_route(self, mock_get):
+    def test_predictions_for_stop_no_route(self, mock_get: MagicMock):
         mock_get.return_value = MOCK_PREDICTIONS_RESPONSE_NO_ROUTE
 
         result = self.client.predictions_for_stop(
@@ -32,7 +33,7 @@ class TestNextBusClient(unittest.TestCase):
         )
 
     @unittest.mock.patch("py_nextbus.client.NextBusClient._get")
-    def test_predictions_for_stop_with_route(self, mock_get):
+    def test_predictions_for_stop_with_route(self, mock_get: MagicMock):
         mock_get.return_value = MOCK_PREDICTIONS_RESPONSE_WITH_ROUTE
 
         result = self.client.predictions_for_stop(

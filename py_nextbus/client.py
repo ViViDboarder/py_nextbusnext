@@ -10,6 +10,11 @@ from typing import cast
 import requests
 from requests.exceptions import HTTPError
 
+from py_nextbus.models import AgencyInfo
+from py_nextbus.models import RouteDetails
+from py_nextbus.models import RouteInfo
+from py_nextbus.models import StopPrediction
+
 LOG = logging.getLogger()
 
 
@@ -17,8 +22,9 @@ class NextBusError(Exception):
     pass
 
 
-class NextBusHTTPError(HTTPError, NextBusError):
+class NextBusHTTPError(NextBusError):
     def __init__(self, message: str, http_err: HTTPError):
+        super().__init__()
         self.__dict__.update(http_err.__dict__)
         self.message: str = message
 
@@ -102,27 +108,24 @@ class NextBusClient:
 
         return self.rate_limit_remaining / self.rate_limit * 100
 
-    def agencies(self) -> list[dict[str, Any]]:
-        result = self._get("agencies")
-        return cast(list[dict[str, Any]], result)
+    def agencies(self) -> list[AgencyInfo]:
+        return cast(list[AgencyInfo], self._get("agencies"))
 
-    def routes(self, agency_id: str | None = None) -> list[dict[str, Any]]:
+    def routes(self, agency_id: str | None = None) -> list[RouteInfo]:
         if not agency_id:
             agency_id = self.agency_id
 
-        result = self._get(f"agencies/{agency_id}/routes")
-        return cast(list[dict[str, Any]], result)
+        return cast(list[RouteInfo], self._get(f"agencies/{agency_id}/routes"))
 
     def route_details(
         self, route_id: str, agency_id: str | None = None
-    ) -> dict[str, Any] | str:
+    ) -> RouteDetails:
         """Includes stops and directions."""
         agency_id = agency_id or self.agency_id
         if not agency_id:
             raise NextBusValidationError("Agency ID is required")
 
-        result = self._get(f"agencies/{agency_id}/routes/{route_id}")
-        return cast(dict[str, Any], result)
+        return cast(RouteDetails, self._get(f"agencies/{agency_id}/routes/{route_id}"))
 
     def predictions_for_stop(
         self,
@@ -130,7 +133,7 @@ class NextBusClient:
         route_id: str | None = None,
         direction_id: str | None = None,
         agency_id: str | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[StopPrediction]:
         """Returns predictions for a stop."""
         agency_id = agency_id or self.agency_id
         if not agency_id:
@@ -141,13 +144,17 @@ class NextBusClient:
                 raise NextBusValidationError("Direction ID provided without route ID")
 
         if route_id:
-            result = self._get(
-                f"agencies/{agency_id}/nstops/{route_id}:{stop_id}/predictions"
+            predictions = cast(
+                list[StopPrediction],
+                self._get(
+                    f"agencies/{agency_id}/nstops/{route_id}:{stop_id}/predictions"
+                ),
             )
         else:
-            result = self._get(f"agencies/{agency_id}/stops/{stop_id}/predictions")
-
-        predictions = cast(list[dict[str, Any]], result)
+            predictions = cast(
+                list[StopPrediction],
+                self._get(f"agencies/{agency_id}/stops/{stop_id}/predictions"),
+            )
 
         # If route not provided, return all predictions as the API returned them
         if not route_id:
@@ -174,9 +181,7 @@ class NextBusClient:
 
         return predictions
 
-    def _get(
-        self, endpoint: str, params: dict[str, Any] | None = None
-    ) -> dict[str, Any] | list[dict[str, Any]]:
+    def _get(self, endpoint: str, params: dict[str, Any] | None = None) -> Any:
         if params is None:
             params = {}
 
