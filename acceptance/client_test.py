@@ -13,8 +13,8 @@ class ClientTest(unittest.TestCase):
     def setUp(self):
         self.client = NextBusClient()
 
-    def test_list_gencies(self):
-        agencies: list[dict[str, str]] = self.client.agencies()
+    def test_list_agencies(self):
+        agencies = self.client.agencies()
 
         # Check critical agency keys
         for agency in agencies:
