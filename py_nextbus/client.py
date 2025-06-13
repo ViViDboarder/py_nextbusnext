@@ -61,27 +61,32 @@ class NextBusClient:
         agency_id: str | None = None,
     ) -> None:
         self.agency_id: str | None = agency_id
-
-        self._session: requests.Session = requests.Session()
-        self._session.headers.update(
-            {
-                "Accept": "application/json",
-                "Accept-Encoding": "gzip, deflate, br, zstd",
-                "Accept-Language": "en-US,en;q=0.5",
-                "Compress": "true",
-                "Connection": "keep-alive",
-                "DNT": "1",
-                "Origin": "https://rider.umoiq.com",
-                "Referer": "https://rider.umoiq.com/",
-                "Sec-Fetch-Dest": "empty",
-                "Sec-Fetch-Mode": "cors",
-                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0",
-            }
-        )
-
+        self._session: requests.Session | None = None
         self._rate_limit: int = 0
         self._rate_limit_remaining: int = 0
         self._rate_limit_reset: datetime | None = None
+
+    @property
+    def session(self) -> requests.Session:
+        if self._session is None:
+            self._session = requests.Session()
+            self._session.headers.update(
+                {
+                    "Accept": "application/json",
+                    "Accept-Encoding": "gzip, deflate, br, zstd",
+                    "Accept-Language": "en-US,en;q=0.5",
+                    "Compress": "true",
+                    "Connection": "keep-alive",
+                    "DNT": "1",
+                    "Origin": "https://rider.umoiq.com",
+                    "Referer": "https://rider.umoiq.com/",
+                    "Sec-Fetch-Dest": "empty",
+                    "Sec-Fetch-Mode": "cors",
+                    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0",
+                }
+            )
+
+        return self._session
 
     @property
     def rate_limit(self) -> int:
@@ -186,7 +191,7 @@ class NextBusClient:
         try:
             url = f"{self.base_url}/{endpoint}"
             LOG.debug("GET %s", url)
-            response = self._session.get(url, params=params)
+            response = self.session.get(url, params=params)
             response.raise_for_status()
 
             # Track rate limit information
@@ -200,8 +205,12 @@ class NextBusClient:
             )
 
             return response.json()
-
         except HTTPError as exc:
             raise NextBusHTTPError("Error from the NextBus API", exc) from exc
+        except ConnectionResetError:
+            # Clear old session so new one is created on next request
+            self.session.close()
+            self._session = None
+            raise NextBusError("Connection was reset while making request") from None
         except json.decoder.JSONDecodeError as exc:
             raise NextBusFormatError("Failed to parse JSON from request") from exc
