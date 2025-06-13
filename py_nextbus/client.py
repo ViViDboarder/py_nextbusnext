@@ -65,19 +65,17 @@ class NextBusClient:
         self._session: requests.Session = requests.Session()
         self._session.headers.update(
             {
-                "User-Agent": "PyNextBus",
                 "Accept": "application/json",
-                "Accept-Language": "en-US,en;q=0.5",
                 "Accept-Encoding": "gzip, deflate, br, zstd",
+                "Accept-Language": "en-US,en;q=0.5",
                 "Compress": "true",
+                "Connection": "keep-alive",
                 "DNT": "1",
+                "Origin": "https://rider.umoiq.com",
+                "Referer": "https://rider.umoiq.com/",
                 "Sec-Fetch-Dest": "empty",
                 "Sec-Fetch-Mode": "cors",
-                "Connection": "keep-alive",
-                # Additional headers used in browser
-                # "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0",
-                # "Referer": "https://rider.umoiq.com/",
-                # "Origin": "https://rider.umoiq.com",
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0",
             }
         )
 
